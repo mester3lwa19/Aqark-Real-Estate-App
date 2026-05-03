@@ -32,7 +32,9 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
         // 1. Recover Email
         final Object? args = ModalRoute.of(context)!.settings.arguments;
-        String? email = args is String ? args : prefs.getString('reset_email_temp');
+        String? email = args is String
+            ? args
+            : prefs.getString('reset_email_temp');
 
         if (email == null || email.isEmpty) {
           throw "Session expired. Please restart the reset process.";
@@ -84,8 +86,8 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text("Auth Error: ${e.toString()}"),
-                backgroundColor: Colors.redAccent
+              content: Text("Auth Error: ${e.toString()}"),
+              backgroundColor: Colors.redAccent,
             ),
           );
         }
@@ -119,11 +121,28 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                 const SizedBox(height: 10),
                 Image.asset('assets/images/Aqark.png', height: 100),
                 const SizedBox(height: 40),
-                Text("Enter your new password", style: AppTypography.createStyle(fontSize: AppTypography.fontSize5, fontWeight: AppTypography.weightBold, lineHeight: AppTypography.lineHeight6).copyWith(color: colors.textPrimary)),
+                Text(
+                  "Enter your new password",
+                  style: AppTypography.createStyle(
+                    fontSize: AppTypography.fontSize5,
+                    fontWeight: AppTypography.weightBold,
+                    lineHeight: AppTypography.lineHeight6,
+                  ).copyWith(color: colors.textPrimary),
+                ),
                 const SizedBox(height: 30),
-                _buildField(_passwordController, "Password", _obscurePassword, (v) => setState(() => _obscurePassword = !v)),
+                _buildField(
+                  _passwordController,
+                  "Password",
+                  _obscurePassword,
+                  (v) => setState(() => _obscurePassword = !v),
+                ),
                 const SizedBox(height: 20),
-                _buildField(_confirmPasswordController, "Confirm Password", _obscureConfirmPassword, (v) => setState(() => _obscureConfirmPassword = !v)),
+                _buildField(
+                  _confirmPasswordController,
+                  "Confirm Password",
+                  _obscureConfirmPassword,
+                  (v) => setState(() => _obscureConfirmPassword = !v),
+                ),
                 const SizedBox(height: 40),
                 _buildConfirmButton(colors),
                 const SizedBox(height: 30),
@@ -136,7 +155,12 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
     );
   }
 
-  Widget _buildField(TextEditingController ctrl, String label, bool obscure, Function(bool) toggle) {
+  Widget _buildField(
+    TextEditingController ctrl,
+    String label,
+    bool obscure,
+    Function(bool) toggle,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -147,7 +171,10 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
           obscureText: obscure,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: IconButton(icon: Icon(obscure ? Icons.visibility_off : Icons.visibility), onPressed: () => toggle(obscure)),
+            suffixIcon: IconButton(
+              icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+              onPressed: () => toggle(obscure),
+            ),
             filled: true,
             fillColor: Colors.grey[100],
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -159,11 +186,17 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
   Widget _buildConfirmButton(AppSemanticColors colors) {
     return SizedBox(
-      width: double.infinity, height: 56,
+      width: double.infinity,
+      height: 56,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: colors.actionPrimaryDefault, shape: StadiumBorder()),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.actionPrimaryDefault,
+          shape: StadiumBorder(),
+        ),
         onPressed: _isLoading ? null : _handleConfirm,
-        child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text("Confirm", style: TextStyle(color: Colors.white)),
+        child: _isLoading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Text("Confirm", style: TextStyle(color: Colors.white)),
       ),
     );
   }

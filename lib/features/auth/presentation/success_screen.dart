@@ -31,7 +31,13 @@ class SuccessScreen extends StatelessWidget {
                       color: Colors.grey.shade100,
                       shape: BoxShape.circle,
                     ),
-                    child: const Center(child: Icon(Icons.check_circle, size: 100, color: Colors.green)),
+                    child: const Center(
+                      child: Icon(
+                        Icons.check_circle,
+                        size: 100,
+                        color: Colors.green,
+                      ),
+                    ),
                   );
                 },
               ),
@@ -61,7 +67,7 @@ class SuccessScreen extends StatelessWidget {
                     Navigator.pushNamedAndRemoveUntil(
                       context,
                       AppRoutes.login,
-                          (route) => false,
+                      (route) => false,
                     );
                   },
                   child: Text(

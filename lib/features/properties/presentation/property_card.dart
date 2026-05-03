@@ -41,7 +41,9 @@ class PropertyCard extends StatelessWidget {
             height: 150,
             decoration: BoxDecoration(
               // FIXED: Using withValues(alpha: ...) instead of withOpacity
-              color: colorScheme.secondary.withValues(alpha: AppOpacity.opacity10),
+              color: colorScheme.secondary.withValues(
+                alpha: AppOpacity.opacity10,
+              ),
               borderRadius: BorderRadius.circular(AppRadius.radius8),
             ),
           ),
@@ -81,22 +83,25 @@ class PropertyCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     // FIXED: Using withValues(alpha: ...) instead of withOpacity
                     color: isLightMode
-                        ? AppSemanticColors.light.propertyVerifiedBadge.withValues(alpha: AppOpacity.opacity15)
-                        : AppSemanticColors.dark.propertyVerifiedBadge.withValues(alpha: AppOpacity.opacity15),
+                        ? AppSemanticColors.light.propertyVerifiedBadge
+                              .withValues(alpha: AppOpacity.opacity15)
+                        : AppSemanticColors.dark.propertyVerifiedBadge
+                              .withValues(alpha: AppOpacity.opacity15),
                     borderRadius: BorderRadius.circular(AppRadius.radius4),
                   ),
                   child: Text(
                     'Verified',
                     // FIXED: Using createStyle instead of bodySmall
-                    style: AppTypography.createStyle(
-                      fontSize: AppTypography.fontSize3,
-                      fontWeight: AppTypography.weightSemiBold,
-                      lineHeight: AppTypography.lineHeight4,
-                    ).copyWith(
-                      color: isLightMode
-                          ? AppSemanticColors.light.propertyVerifiedBadge
-                          : AppSemanticColors.dark.propertyVerifiedBadge,
-                    ),
+                    style:
+                        AppTypography.createStyle(
+                          fontSize: AppTypography.fontSize3,
+                          fontWeight: AppTypography.weightSemiBold,
+                          lineHeight: AppTypography.lineHeight4,
+                        ).copyWith(
+                          color: isLightMode
+                              ? AppSemanticColors.light.propertyVerifiedBadge
+                              : AppSemanticColors.dark.propertyVerifiedBadge,
+                        ),
                   ),
                 ),
             ],

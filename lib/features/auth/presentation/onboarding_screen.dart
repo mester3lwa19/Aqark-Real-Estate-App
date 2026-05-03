@@ -39,21 +39,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       titleStart: 'Find Your Dream\nHome, ',
       titleHighlight: 'Effortlessly.',
       titleEnd: '',
-      description: 'Discover thousands of properties tailored to your budget. Filter by location, price, and flexible installment plans.',
+      description:
+          'Discover thousands of properties tailored to your budget. Filter by location, price, and flexible installment plans.',
     ),
     OnboardingContent(
       imagePath: 'assets/images/onboarding2.png',
       titleStart: '',
       titleHighlight: '100% ',
       titleEnd: 'Verified & Real\nListings.',
-      description: 'Say goodbye to fake ads and hidden prices. We verify properties and agents to guarantee a safe, transparent experience.',
+      description:
+          'Say goodbye to fake ads and hidden prices. We verify properties and agents to guarantee a safe, transparent experience.',
     ),
     OnboardingContent(
       imagePath: 'assets/images/onboarding3.png',
       titleStart: 'Connect ',
       titleHighlight: 'Directly,\nInstantly.',
       titleEnd: '',
-      description: 'Found what you love? Call or WhatsApp the owner or verified broker directly with a single tap. No middleman delays.',
+      description:
+          'Found what you love? Call or WhatsApp the owner or verified broker directly with a single tap. No middleman delays.',
     ),
   ];
 
@@ -168,11 +171,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 const SizedBox(height: AppSpacing.spacing4),
                 Text(
                   content.description,
-                  style: AppTypography.createStyle(
-                    fontSize: AppTypography.fontSize4,
-                    fontWeight: AppTypography.weightNormal,
-                    lineHeight: AppTypography.lineHeight6,
-                  ).copyWith(color: colorScheme.onSurface.withValues(alpha: 0.8)),
+                  style:
+                      AppTypography.createStyle(
+                        fontSize: AppTypography.fontSize4,
+                        fontWeight: AppTypography.weightNormal,
+                        lineHeight: AppTypography.lineHeight6,
+                      ).copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.8),
+                      ),
                 ),
               ],
             ),
@@ -219,9 +225,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: AppSpacing.spacing3),
         TextButton(
           onPressed: _skipToLogin,
-          style: TextButton.styleFrom(
-            foregroundColor: colorScheme.onSurface,
-          ),
+          style: TextButton.styleFrom(foregroundColor: colorScheme.onSurface),
           child: Text(
             'Skip',
             style: AppTypography.createStyle(
@@ -289,9 +293,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           onPressed: () {
             Navigator.pushReplacementNamed(context, AppRoutes.mainHub);
           },
-          style: TextButton.styleFrom(
-            foregroundColor: colorScheme.onSurface,
-          ),
+          style: TextButton.styleFrom(foregroundColor: colorScheme.onSurface),
           child: Text(
             'Continue as a Guest',
             style: AppTypography.createStyle(

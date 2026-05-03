@@ -1,1 +1,33 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"aqark-real-estate-app","appId":"1:830265072894:android:4db6b8b2227c1d2a8299af","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"aqark-real-estate-app","configurations":{"android":"1:830265072894:android:4db6b8b2227c1d2a8299af","ios":"1:830265072894:ios:d7de5b9809a6bbd88299af","macos":"1:830265072894:ios:d7de5b9809a6bbd88299af","web":"1:830265072894:web:94ec557d32218f7a8299af","windows":"1:830265072894:web:14eea6b6015280ee8299af"}}}}}}
+{
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "aqark-real-estate-app",
+                    "appId": "1:830265072894:android:4db6b8b2227c1d2a8299af",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "aqark-real-estate-app",
+                    "configurations": {
+                        "android": "1:830265072894:android:4db6b8b2227c1d2a8299af",
+                        "ios": "1:830265072894:ios:d7de5b9809a6bbd88299af",
+                        "macos": "1:830265072894:ios:d7de5b9809a6bbd88299af",
+                        "web": "1:830265072894:web:94ec557d32218f7a8299af",
+                        "windows": "1:830265072894:web:14eea6b6015280ee8299af"
+                    }
+                }
+            }
+        }
+    },
+    "emulators": {
+        "dataconnect": {
+            "dataDir": "dataconnect/.dataconnect/pgliteData"
+        }
+    },
+    "dataconnect": {
+        "source": "dataconnect"
+    }
+}

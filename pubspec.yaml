@@ -44,6 +44,7 @@ dependencies:
   connectivity_plus: ^7.1.1
   firebase_database: ^12.3.0
   shared_preferences: ^2.5.5
+  firebase_data_connect: ^0.3.0
 
 dev_dependencies:
   flutter_test:

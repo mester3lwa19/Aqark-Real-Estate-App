@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import '../features/auth/presentation/login_screen.dart';
 import 'app_routes.dart';
-import '../features/properties/presentation/home_screen.dart';
+// Feature Imports
+import '../features/auth/presentation/sign_up_screen.dart';
+// import '../features/auth/presentation/sign_otp_screen.dart';
+import '../features/auth/presentation/forget_password_screen.dart';
+import '../features/auth/presentation/new_password_screen.dart';
+import '../features/auth/presentation/success_screen.dart';
 import '../features/auth/presentation/onboarding_screen.dart';
+import '../features/properties/presentation/home_screen.dart';
 class RouterGenerator {
   static Route generateRoute(RouteSettings settings) {
     // You can extract arguments here for screens that need them
@@ -14,17 +21,19 @@ class RouterGenerator {
       case AppRoutes.onboarding:
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case AppRoutes.login:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Login'));
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
       case AppRoutes.signup:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Signup'));
-      case AppRoutes.otpVerification:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('OTP Verification'));
+        return MaterialPageRoute(builder: (_) => const SignUpScreen());
+      // case AppRoutes.otpVerification:
+      //   return MaterialPageRoute(builder: (_) => const SignOtpScreen(userData: {},));
       case AppRoutes.forgotPassword:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Forgot Password'));
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
       case AppRoutes.resetPassword:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Reset Password'));
+        return MaterialPageRoute(builder: (_) => const NewPasswordScreen());
       case AppRoutes.passwordSuccess:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Password Success'));
+        return MaterialPageRoute(builder: (_) => const SuccessScreen());
+
+
 
     // ----------------------------------------
     // 2. MAIN HUB (Bottom Navigation)

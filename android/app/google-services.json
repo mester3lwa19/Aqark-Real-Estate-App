@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "830265072894",
+    "firebase_url": "https://aqark-real-estate-app-default-rtdb.firebaseio.com",
+    "project_id": "aqark-real-estate-app",
+    "storage_bucket": "aqark-real-estate-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830265072894:android:4db6b8b2227c1d2a8299af",
+        "android_client_info": {
+          "package_name": "com.example.aqark_futter_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "830265072894-3qe7bh6nb294uk7ra5ej4s8vkait2qlq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNrRMQ7QnZI5Ko8ljQyt18N2Qrkk80Ohw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "830265072894-3qe7bh6nb294uk7ra5ej4s8vkait2qlq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "830265072894-5jpgsf27g0lpjv7b38qr9qhuif42qtt6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.aqarkFutterProject"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

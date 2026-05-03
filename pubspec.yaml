@@ -1,5 +1,6 @@
 name: aqark_futter_project
 description: "A new Flutter project."
+
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -19,7 +20,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.11.1
+  # This change makes it compatible with your 3.11.0 and his 3.11.1
+  sdk: '>=3.11.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -34,6 +36,14 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  sqflite: ^2.4.2+1
+  path: ^1.9.1
+  firebase_auth: ^6.4.0
+  firebase_core: ^4.7.0
+  google_sign_in: ^7.2.0
+  connectivity_plus: ^7.1.1
+  firebase_database: ^12.3.0
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:

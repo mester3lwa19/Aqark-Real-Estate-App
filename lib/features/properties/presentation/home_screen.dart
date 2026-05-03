@@ -10,9 +10,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aqark Properties'),
-      ),
+      appBar: AppBar(title: const Text('Aqark Properties')),
       // ListView lets us scroll through the properties
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.spacing4),

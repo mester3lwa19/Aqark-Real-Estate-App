@@ -54,9 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
             if (mounted) {
               // Navigate to Home and clear navigation stack
               Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  AppRoutes.home,
-                      (route) => false
+                context,
+                AppRoutes.home,
+                (route) => false,
               );
             }
           } else {
@@ -102,7 +102,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   "Welcome Back",
                   style: AppTypography.createStyle(
                     fontSize: AppTypography.fontSize6,
-                    fontWeight: AppTypography.weightBold, lineHeight: AppTypography.lineHeight7,
+                    fontWeight: AppTypography.weightBold,
+                    lineHeight: AppTypography.lineHeight7,
                   ).copyWith(color: colors.textPrimary),
                 ),
                 const SizedBox(height: 40),
@@ -112,8 +113,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) => (v == null || !v.contains('@')) ? "Enter valid email" : null,
-                  decoration: _inputDecoration(Icons.email_outlined, "example@gmail.com", colors),
+                  validator: (v) => (v == null || !v.contains('@'))
+                      ? "Enter valid email"
+                      : null,
+                  decoration: _inputDecoration(
+                    Icons.email_outlined,
+                    "example@gmail.com",
+                    colors,
+                  ),
                 ),
 
                 const SizedBox(height: 20),
@@ -123,14 +130,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  validator: (v) => (v == null || v.isEmpty) ? "Enter password" : null,
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? "Enter password" : null,
                   decoration: _inputDecoration(
                     Icons.lock_outline,
                     "••••••",
                     colors,
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                 ),
@@ -139,8 +152,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
-                    child: Text("Forgot Password?", style: TextStyle(color: colors.actionPrimaryDefault)),
+                    onPressed: () =>
+                        Navigator.pushNamed(context, AppRoutes.forgotPassword),
+                    child: Text(
+                      "Forgot Password?",
+                      style: TextStyle(color: colors.actionPrimaryDefault),
+                    ),
                   ),
                 ),
 
@@ -153,12 +170,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colors.actionPrimaryDefault,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.radiusFull)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppRadius.radiusFull,
+                        ),
+                      ),
                     ),
                     onPressed: _isLoading ? null : _handleLogin,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : Text("Login", style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        : Text(
+                            "Login",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
 
@@ -170,8 +198,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Text("Don't have an account? "),
                     GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, AppRoutes.signup),
-                      child: Text("Sign Up", style: TextStyle(color: colors.actionPrimaryDefault, fontWeight: FontWeight.bold)),
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.signup),
+                      child: Text(
+                        "Sign Up",
+                        style: TextStyle(
+                          color: colors.actionPrimaryDefault,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -193,7 +228,12 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(IconData icon, String hint, AppSemanticColors colors, {Widget? suffixIcon}) {
+  InputDecoration _inputDecoration(
+    IconData icon,
+    String hint,
+    AppSemanticColors colors, {
+    Widget? suffixIcon,
+  }) {
     return InputDecoration(
       prefixIcon: Icon(icon),
       suffixIcon: suffixIcon,

@@ -79,12 +79,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 Image.asset('assets/images/Aqark.png', height: 100),
                 const SizedBox(height: 30),
                 Text(
-                    "Create an Account",
-                    style: AppTypography.createStyle(
-                        fontSize: AppTypography.fontSize6,
-                        fontWeight: AppTypography.weightBold,
-                        lineHeight: AppTypography.lineHeight7
-                    ).copyWith(color: colors.textPrimary)
+                  "Create an Account",
+                  style: AppTypography.createStyle(
+                    fontSize: AppTypography.fontSize6,
+                    fontWeight: AppTypography.weightBold,
+                    lineHeight: AppTypography.lineHeight7,
+                  ).copyWith(color: colors.textPrimary),
                 ),
                 const SizedBox(height: 30),
 
@@ -92,8 +92,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value!.isEmpty ? "Please enter an email" : null,
-                  decoration: _inputDecoration("example@email.com", Icons.email_outlined, colors),
+                  validator: (value) =>
+                      value!.isEmpty ? "Please enter an email" : null,
+                  decoration: _inputDecoration(
+                    "example@email.com",
+                    Icons.email_outlined,
+                    colors,
+                  ),
                 ),
                 const SizedBox(height: 20),
 
@@ -101,12 +106,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  validator: (value) => value!.length < 6 ? "Password must be at least 6 characters" : null,
-                  decoration: _inputDecoration("********", Icons.lock_outline, colors,
-                      suffix: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                      )),
+                  validator: (value) => value!.length < 6
+                      ? "Password must be at least 6 characters"
+                      : null,
+                  decoration: _inputDecoration(
+                    "********",
+                    Icons.lock_outline,
+                    colors,
+                    suffix: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 40),
@@ -116,13 +132,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   height: 56,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.actionPrimaryDefault,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.radiusFull))
+                      backgroundColor: colors.actionPrimaryDefault,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppRadius.radiusFull,
+                        ),
+                      ),
                     ),
                     onPressed: _isLoading ? null : _handleSignUp,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("Sign Up", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        : const Text(
+                            "Sign Up",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
 
@@ -133,8 +159,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   children: [
                     const Text("Already have an account? "),
                     GestureDetector(
-                      onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.login),
-                      child: Text("Login", style: TextStyle(color: colors.actionPrimaryDefault, fontWeight: FontWeight.bold)),
+                      onTap: () => Navigator.pushReplacementNamed(
+                        context,
+                        AppRoutes.login,
+                      ),
+                      child: Text(
+                        "Login",
+                        style: TextStyle(
+                          color: colors.actionPrimaryDefault,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -147,23 +182,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildLabel(String text) => Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold))
-      )
+    alignment: Alignment.centerLeft,
+    child: Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
+    ),
   );
 
-  InputDecoration _inputDecoration(String hint, IconData icon, AppSemanticColors colors, {Widget? suffix}) =>
-      InputDecoration(
-          hintText: hint,
-          prefixIcon: Icon(icon),
-          suffixIcon: suffix,
-          filled: true,
-          fillColor: colors.inputBackground,
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.radius8),
-              borderSide: BorderSide.none
-          )
-      );
+  InputDecoration _inputDecoration(
+    String hint,
+    IconData icon,
+    AppSemanticColors colors, {
+    Widget? suffix,
+  }) => InputDecoration(
+    hintText: hint,
+    prefixIcon: Icon(icon),
+    suffixIcon: suffix,
+    filled: true,
+    fillColor: colors.inputBackground,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppRadius.radius8),
+      borderSide: BorderSide.none,
+    ),
+  );
 }

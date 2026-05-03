@@ -34,7 +34,11 @@ class LocalDatabaseService {
   // Save user locally
   Future<void> saveUserLocally(Map<String, dynamic> user) async {
     final db = await database;
-    await db.insert('users', user, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'users',
+      user,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   // Get unsynced users (for background syncing)

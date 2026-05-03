@@ -100,13 +100,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 const SizedBox(height: 30),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("Email", style: TextStyle(fontWeight: AppTypography.weightBold, color: colors.textPrimary, fontSize: 14)),
+                  child: Text(
+                    "Email",
+                    style: TextStyle(
+                      fontWeight: AppTypography.weightBold,
+                      color: colors.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (val) => (val == null || !val.contains('@')) ? "Enter a valid email" : null,
+                  validator: (val) => (val == null || !val.contains('@'))
+                      ? "Enter a valid email"
+                      : null,
                   decoration: InputDecoration(
                     hintText: "example@email.com",
                     prefixIcon: const Icon(Icons.email_outlined, size: 20),
@@ -116,7 +125,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       borderRadius: BorderRadius.circular(AppRadius.radius8),
                       borderSide: BorderSide(color: Colors.grey.shade400),
                     ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.radius8)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.radius8),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -126,16 +137,31 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colors.actionPrimaryDefault,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.radiusFull)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppRadius.radiusFull,
+                        ),
+                      ),
                     ),
                     onPressed: _isLoading ? null : _handleReset,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : Text("Confirm", style: AppTypography.createStyle(fontSize: AppTypography.fontSize4, fontWeight: AppTypography.weightBold, lineHeight: AppTypography.lineHeight5).copyWith(color: colors.textButton)),
+                        : Text(
+                            "Confirm",
+                            style: AppTypography.createStyle(
+                              fontSize: AppTypography.fontSize4,
+                              fontWeight: AppTypography.weightBold,
+                              lineHeight: AppTypography.lineHeight5,
+                            ).copyWith(color: colors.textButton),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 40),
-                Image.asset('assets/images/cuate.png', height: 250, fit: BoxFit.contain),
+                Image.asset(
+                  'assets/images/cuate.png',
+                  height: 250,
+                  fit: BoxFit.contain,
+                ),
               ],
             ),
           ),

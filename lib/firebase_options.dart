@@ -67,7 +67,8 @@ class DefaultFirebaseOptions {
     projectId: 'aqark-real-estate-app',
     databaseURL: 'https://aqark-real-estate-app-default-rtdb.firebaseio.com',
     storageBucket: 'aqark-real-estate-app.firebasestorage.app',
-    iosClientId: '830265072894-5jpgsf27g0lpjv7b38qr9qhuif42qtt6.apps.googleusercontent.com',
+    iosClientId:
+        '830265072894-5jpgsf27g0lpjv7b38qr9qhuif42qtt6.apps.googleusercontent.com',
     iosBundleId: 'com.example.aqarkFutterProject',
   );
 
@@ -78,7 +79,8 @@ class DefaultFirebaseOptions {
     projectId: 'aqark-real-estate-app',
     databaseURL: 'https://aqark-real-estate-app-default-rtdb.firebaseio.com',
     storageBucket: 'aqark-real-estate-app.firebasestorage.app',
-    iosClientId: '830265072894-5jpgsf27g0lpjv7b38qr9qhuif42qtt6.apps.googleusercontent.com',
+    iosClientId:
+        '830265072894-5jpgsf27g0lpjv7b38qr9qhuif42qtt6.apps.googleusercontent.com',
     iosBundleId: 'com.example.aqarkFutterProject',
   );
 
@@ -92,5 +94,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'aqark-real-estate-app.firebasestorage.app',
     measurementId: 'G-R7E9PH3V0M',
   );
-
 }

@@ -9,15 +9,16 @@ import '../features/auth/presentation/new_password_screen.dart';
 import '../features/auth/presentation/success_screen.dart';
 import '../features/auth/presentation/onboarding_screen.dart';
 import '../features/properties/presentation/home_screen.dart';
+
 class RouterGenerator {
   static Route generateRoute(RouteSettings settings) {
     // You can extract arguments here for screens that need them
     // final args = settings.arguments;
 
     switch (settings.name) {
-    // ----------------------------------------
-    // 1. AUTH & ONBOARDING
-    // ----------------------------------------
+      // ----------------------------------------
+      // 1. AUTH & ONBOARDING
+      // ----------------------------------------
       case AppRoutes.onboarding:
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case AppRoutes.login:
@@ -33,58 +34,72 @@ class RouterGenerator {
       case AppRoutes.passwordSuccess:
         return MaterialPageRoute(builder: (_) => const SuccessScreen());
 
-
-
-    // ----------------------------------------
-    // 2. MAIN HUB (Bottom Navigation)
-    // ----------------------------------------
+      // ----------------------------------------
+      // 2. MAIN HUB (Bottom Navigation)
+      // ----------------------------------------
       case AppRoutes.mainHub:
-      // This screen will contain the BottomNavigationBar and swap between:
-      // Home, Saved, Comparisons, Messages, Profile
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Main Hub (Bottom Nav)'));
+        // This screen will contain the BottomNavigationBar and swap between:
+        // Home, Saved, Comparisons, Messages, Profile
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Main Hub (Bottom Nav)'),
+        );
 
-    // ----------------------------------------
-    // 3. PROPERTY FLOW
-    // ----------------------------------------
+      // ----------------------------------------
+      // 3. PROPERTY FLOW
+      // ----------------------------------------
       case AppRoutes.filter:
-      // Often a bottom sheet, but can be a full screen
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Filter Options'));
+        // Often a bottom sheet, but can be a full screen
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Filter Options'),
+        );
       case AppRoutes.searchResults:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Search Results / Empty State'));
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Search Results / Empty State'),
+        );
       case AppRoutes.propertyDetails:
-      // You would pass the Property object via arguments here
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Property Details'));
+        // You would pass the Property object via arguments here
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Property Details'),
+        );
 
-    // ----------------------------------------
-    // 4. COMPARISON FLOW
-    // ----------------------------------------
+      // ----------------------------------------
+      // 4. COMPARISON FLOW
+      // ----------------------------------------
       case AppRoutes.selectToCompare:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Select Properties to Compare'));
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Select Properties to Compare'),
+        );
       case AppRoutes.comparisonResult:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Comparison Results Table'));
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Comparison Results Table'),
+        );
 
-    // ----------------------------------------
-    // 5. PROFILE & MESSAGES EXPANSIONS
-    // ----------------------------------------
+      // ----------------------------------------
+      // 5. PROFILE & MESSAGES EXPANSIONS
+      // ----------------------------------------
       case AppRoutes.editProfile:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Edit Profile'));
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Edit Profile'),
+        );
       case AppRoutes.propertyAlerts:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Property Alerts'));
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Property Alerts'),
+        );
       case AppRoutes.chatThread:
-        return MaterialPageRoute(builder: (_) => _buildDummyScreen('Direct Chat Thread'));
+        return MaterialPageRoute(
+          builder: (_) => _buildDummyScreen('Direct Chat Thread'),
+        );
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
 
-    // ----------------------------------------
-    // FALLBACK ROUTE
-    // ----------------------------------------
+      // ----------------------------------------
+      // FALLBACK ROUTE
+      // ----------------------------------------
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             appBar: AppBar(title: const Text('Error')),
-            body: Center(
-              child: Text('No route defined for ${settings.name}'),
-            ),
+            body: Center(child: Text('No route defined for ${settings.name}')),
           ),
         );
     }

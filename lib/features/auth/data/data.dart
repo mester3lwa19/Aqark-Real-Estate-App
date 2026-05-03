@@ -11,7 +11,10 @@ class AuthRepository {
   static const String _keyPass = 'local_password';
 
   // --- REGISTRATION ---
-  Future<UserCredential?> signUp({required String email, required String password}) async {
+  Future<UserCredential?> signUp({
+    required String email,
+    required String password,
+  }) async {
     final cleanEmail = email.trim();
     final cleanPass = password.trim();
 

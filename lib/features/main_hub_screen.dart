@@ -16,8 +16,8 @@ class _MainHubScreenState extends State<MainHubScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const FavoritesScreen(),
-    const Center(child: Text('Comparisons')),
-    const Center(child: Text('Messages')),
+    const Center(child: Text('Compare')),
+    const Center(child: Text('Chat')),
     const ProfileScreen(),
   ];
 
@@ -42,7 +42,7 @@ class _MainHubScreenState extends State<MainHubScreen> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Saved'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(icon: Icon(Icons.compare_arrows), label: 'Compare'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),

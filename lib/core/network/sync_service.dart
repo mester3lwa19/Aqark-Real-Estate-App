@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../features/auth/data/data.dart';
 import '../../features/properties/data/data.dart';
@@ -29,9 +30,9 @@ class SyncService {
     try {
       await authRepository.syncOfflineData();
       await propertyRepository.syncFavorites();
-      print("Offline data sync completed successfully.");
+      debugPrint("Offline data sync completed successfully.");
     } catch (e) {
-      print("Error during offline sync: $e");
+      debugPrint("Error during offline sync: $e");
     }
   }
 

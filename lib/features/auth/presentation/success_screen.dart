@@ -25,7 +25,7 @@ class SuccessScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.spacing4),
                 decoration: BoxDecoration(
-                  color: colors.actionPrimaryDefault.withOpacity(0.1),
+                  color: colors.actionPrimaryDefault.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

@@ -3,12 +3,15 @@ import '../features/auth/presentation/login_screen.dart';
 import 'app_routes.dart';
 // Feature Imports
 import '../features/auth/presentation/sign_up_screen.dart';
-// import '../features/auth/presentation/sign_otp_screen.dart';
+import '../features/auth/presentation/sign_otp_screen.dart';
 import '../features/auth/presentation/forget_password_screen.dart';
 import '../features/auth/presentation/new_password_screen.dart';
 import '../features/auth/presentation/success_screen.dart';
 import '../features/auth/presentation/onboarding_screen.dart';
 import '../features/properties/presentation/home_screen.dart';
+import '../features/properties/presentation/property_details_screen.dart';
+import '../features/properties/models/models.dart';
+import '../features/main_hub_screen.dart';
 
 class RouterGenerator {
   static Route generateRoute(RouteSettings settings) {
@@ -25,8 +28,8 @@ class RouterGenerator {
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case AppRoutes.signup:
         return MaterialPageRoute(builder: (_) => const SignUpScreen());
-      // case AppRoutes.otpVerification:
-      //   return MaterialPageRoute(builder: (_) => const SignOtpScreen(userData: {},));
+      case AppRoutes.otpVerification:
+        return MaterialPageRoute(builder: (_) => const SignOtpScreen());
       case AppRoutes.forgotPassword:
         return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
       case AppRoutes.resetPassword:
@@ -38,11 +41,7 @@ class RouterGenerator {
       // 2. MAIN HUB (Bottom Navigation)
       // ----------------------------------------
       case AppRoutes.mainHub:
-        // This screen will contain the BottomNavigationBar and swap between:
-        // Home, Saved, Comparisons, Messages, Profile
-        return MaterialPageRoute(
-          builder: (_) => _buildDummyScreen('Main Hub (Bottom Nav)'),
-        );
+        return MaterialPageRoute(builder: (_) => const MainHubScreen());
 
       // ----------------------------------------
       // 3. PROPERTY FLOW
@@ -57,9 +56,9 @@ class RouterGenerator {
           builder: (_) => _buildDummyScreen('Search Results / Empty State'),
         );
       case AppRoutes.propertyDetails:
-        // You would pass the Property object via arguments here
+        final property = settings.arguments as Property;
         return MaterialPageRoute(
-          builder: (_) => _buildDummyScreen('Property Details'),
+          builder: (_) => PropertyDetailsScreen(property: property),
         );
 
       // ----------------------------------------

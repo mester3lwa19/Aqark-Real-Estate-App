@@ -1,46 +1,68 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/database/database_helper.dart';
+import '../../../core/network/network_info.dart';
 
 class AuthRepository {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref("users");
+  final FirebaseAuth _auth;
+  final DatabaseReference _dbRef;
+  final DatabaseHelper _dbHelper;
+  final NetworkInfo _networkInfo;
 
-  // Constant keys to ensure SignUp and SignIn always use identical storage slots
+  AuthRepository({
+    required FirebaseAuth auth,
+    required FirebaseDatabase database,
+    required DatabaseHelper dbHelper,
+    required NetworkInfo networkInfo,
+  })  : _auth = auth,
+        _dbRef = database.ref("users"),
+        _dbHelper = dbHelper,
+        _networkInfo = networkInfo;
+
   static const String _keyEmail = 'local_email';
   static const String _keyPass = 'local_password';
+  static const String _keyIsLoggedIn = 'is_logged_in';
 
   // --- REGISTRATION ---
   Future<UserCredential?> signUp({
     required String email,
     required String password,
+    String? name,
   }) async {
     final cleanEmail = email.trim();
     final cleanPass = password.trim();
 
     try {
-      // 1. Create in Firebase Auth
-      UserCredential credential = await _auth.createUserWithEmailAndPassword(
-        email: cleanEmail,
-        password: cleanPass,
-      );
+      if (await _networkInfo.isConnected) {
+        // 1. Firebase Auth
+        UserCredential credential = await _auth.createUserWithEmailAndPassword(
+          email: cleanEmail,
+          password: cleanPass,
+        );
 
-      final String uid = credential.user!.uid;
+        final String uid = credential.user!.uid;
 
-      // 2. Save to Realtime Database (Cloud)
-      await _dbRef.child(uid).set({
-        "email": cleanEmail,
-        "password": cleanPass,
-        "last_updated": ServerValue.timestamp,
-      });
+        // 2. Local DB (sqflite)
+        final userData = {
+          'id': uid,
+          'email': cleanEmail,
+          'name': name,
+          'last_updated': DateTime.now().millisecondsSinceEpoch,
+        };
+        await _dbHelper.saveUser(userData);
 
-      // 3. Save to Local SharedPreferences (For Offline Fallback)
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyEmail, cleanEmail);
-      await prefs.setString(_keyPass, cleanPass);
+        // 3. Remote DB (Firebase Realtime)
+        await _dbRef.child(uid).set(userData);
 
-      return credential;
-    } catch (_) {
+        // 4. Session State
+        await _saveSession(cleanEmail, cleanPass);
+
+        return credential;
+      } else {
+        throw "No internet connection. Please connect to sign up.";
+      }
+    } catch (e) {
       rethrow;
     }
   }
@@ -50,59 +72,74 @@ class AuthRepository {
     final cleanEmail = email.trim();
     final cleanPass = password.trim();
 
-    try {
-      // Try online login first
-      UserCredential credential = await _auth.signInWithEmailAndPassword(
-        email: cleanEmail,
-        password: cleanPass,
-      );
+    if (await _networkInfo.isConnected) {
+      try {
+        UserCredential credential = await _auth.signInWithEmailAndPassword(
+          email: cleanEmail,
+          password: cleanPass,
+        );
 
-      if (credential.user != null) {
-        final prefs = await SharedPreferences.getInstance();
+        if (credential.user != null) {
+          final String uid = credential.user!.uid;
 
-        // CRITICAL: Update local data on every successful online login.
-        // This handles cases where the user reset their password through your new screens.
-        await prefs.setString(_keyEmail, cleanEmail);
-        await prefs.setString(_keyPass, cleanPass);
-        await prefs.setString('last_logged_email', cleanEmail);
+          // Sync from Remote to Local
+          final snapshot = await _dbRef.child(uid).get();
+          if (snapshot.exists) {
+            final data = Map<String, dynamic>.from(snapshot.value as Map);
+            await _dbHelper.saveUser(data);
+          }
+
+          await _saveSession(cleanEmail, cleanPass);
+          return true;
+        }
+      } catch (e) {
+        rethrow;
+      }
+    } else {
+      // Offline mode
+      final prefs = await SharedPreferences.getInstance();
+      final storedEmail = prefs.getString(_keyEmail);
+      final storedPass = prefs.getString(_keyPass);
+
+      if (storedEmail == cleanEmail && storedPass == cleanPass) {
         return true;
       }
-      return false;
-    } on FirebaseAuthException catch (e) {
-      // Trigger offline mode if there is no internet
-      if (e.code == 'network-request-failed') {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.reload(); // Refresh the storage from the device disk
+      throw "Offline: Credentials do not match locally stored data.";
+    }
+    return false;
+  }
 
-        String? storedEmail = prefs.getString(_keyEmail);
-        String? storedPass = prefs.getString(_keyPass);
+  Future<void> _saveSession(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyEmail, email);
+    await prefs.setString(_keyPass, password);
+    await prefs.setBool(_keyIsLoggedIn, true);
+  }
 
-        // Compare input with locally saved data
-        if (storedEmail != null && storedPass != null) {
-          if (cleanEmail == storedEmail && cleanPass == storedPass) {
-            return true; // Offline login success
-          }
-        }
-        throw "Offline error: Credentials do not match saved data.";
-      }
+  // --- PASSWORD RESET ---
+  Future<void> sendPasswordReset(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } catch (e) {
       rethrow;
     }
   }
 
-  // --- PASSWORD RESET (OFFICIAL FIREBASE METHOD) ---
-  Future<void> sendPasswordReset(String email) async {
-    try {
-      // Sends a secure reset link to the user's email inbox
-      await _auth.sendPasswordResetEmail(email: email.trim());
-    } catch (e) {
-      // Provides a more descriptive error if the email doesn't exist in Firebase Auth
-      rethrow;
+  // --- SYNC MECHANISM ---
+  Future<void> syncOfflineData() async {
+    if (await _networkInfo.isConnected && _auth.currentUser != null) {
+      final uid = _auth.currentUser!.uid;
+      final localUser = await _dbHelper.getUser(uid);
+      if (localUser != null) {
+        await _dbRef.child(uid).update(localUser);
+      }
     }
   }
 
   // --- SIGN OUT ---
   Future<void> signOut() async {
-    // Clear the Firebase session so main.dart redirects to Login/Onboarding
     await _auth.signOut();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyIsLoggedIn, false);
   }
 }

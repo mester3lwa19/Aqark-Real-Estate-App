@@ -3,6 +3,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../routes/app_routes.dart';
+import 'widgets/auth_widgets.dart';
 
 class SuccessScreen extends StatelessWidget {
   const SuccessScreen({super.key});
@@ -10,7 +11,6 @@ class SuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppSemanticColors.light;
-
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
       body: SafeArea(
@@ -20,67 +20,44 @@ class SuccessScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              Image.asset(
-                'assets/images/pana1.png',
-                height: 350,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 300,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.check_circle,
-                        size: 100,
-                        color: Colors.green,
-                      ),
-                    ),
-                  );
-                },
+              Image.asset('assets/images/aqark.png', height: 100),
+              const SizedBox(height: 60),
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.spacing4),
+                decoration: BoxDecoration(
+                  color: colors.actionPrimaryDefault.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_circle,
+                  color: colors.actionPrimaryDefault,
+                  size: 100,
+                ),
               ),
               const SizedBox(height: 40),
               Text(
-                "Your password has been reset\ncorreclty",
+                "Password Reset Successfully",
                 textAlign: TextAlign.center,
                 style: AppTypography.createStyle(
-                  fontSize: AppTypography.fontSize5,
+                  fontSize: AppTypography.fontSize6,
                   fontWeight: AppTypography.weightBold,
-                  lineHeight: AppTypography.lineHeight6,
+                  lineHeight: AppTypography.lineHeight7,
                 ).copyWith(color: colors.textPrimary),
               ),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.actionPrimaryDefault,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.radiusFull),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      AppRoutes.login,
-                      (route) => false,
-                    );
-                  },
-                  child: Text(
-                    "Confirm",
-                    style: AppTypography.createStyle(
-                      fontSize: AppTypography.fontSize4,
-                      fontWeight: AppTypography.weightBold,
-                      lineHeight: AppTypography.lineHeight5,
-                    ).copyWith(color: colors.textButton),
-                  ),
-                ),
+              const SizedBox(height: 20),
+              Text(
+                "You can now login with your new password",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colors.textDisabled),
               ),
               const Spacer(),
+              PrimaryAuthButton(
+                text: "Back to Login",
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
+                },
+              ),
+              const SizedBox(height: AppSpacing.spacing8),
             ],
           ),
         ),

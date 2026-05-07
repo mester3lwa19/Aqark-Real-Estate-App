@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_it/get_it.dart';
+import '../data/data.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../routes/app_routes.dart';
+import 'widgets/auth_widgets.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -16,45 +17,28 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  late final AuthRepository _authRepo;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepo = GetIt.instance<AuthRepository>();
+  }
 
   void _handleReset() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-
       try {
         final email = _emailController.text.trim();
-        final dbRef = FirebaseDatabase.instance.ref("users");
-
-        // Check if user exists in Firebase
-        final snapshot = await dbRef
-            .orderByChild("email")
-            .equalTo(email)
-            .limitToFirst(1)
-            .get();
-
-        if (snapshot.exists) {
-          // SAVE EMAIL LOCALLY: Fixes the "Email argument missing" error on reload
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('reset_email_temp', email);
-
-          if (mounted) {
-            Navigator.pushNamed(
-              context,
-              AppRoutes.resetPassword,
-              arguments: email,
-            );
-          }
-        } else {
-          throw "No account found with this email in our system.";
+        await _authRepo.sendPasswordReset(email);
+        if (mounted) {
+          Navigator.pushNamed(context, AppRoutes.resetPassword);
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: Colors.redAccent,
-            ),
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
           );
         }
       } finally {
@@ -66,14 +50,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppSemanticColors.light;
-
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -83,10 +66,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-                Image.asset('assets/images/Aqark.png', height: 100),
+                Image.asset('assets/images/aqark.png', height: 80),
                 const SizedBox(height: 40),
                 Text(
                   "Enter your email so we can send\nyou reset password message",
@@ -97,68 +79,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     lineHeight: AppTypography.lineHeight6,
                   ).copyWith(color: colors.textPrimary),
                 ),
-                const SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Email",
-                    style: TextStyle(
-                      fontWeight: AppTypography.weightBold,
-                      color: colors.textPrimary,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
+                const SizedBox(height: 40),
+                CustomAuthTextField(
                   controller: _emailController,
+                  label: "Email",
+                  hintText: "example@email.com",
+                  prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (val) => (val == null || !val.contains('@'))
-                      ? "Enter a valid email"
-                      : null,
-                  decoration: InputDecoration(
-                    hintText: "example@email.com",
-                    prefixIcon: const Icon(Icons.email_outlined, size: 20),
-                    filled: true,
-                    fillColor: colors.inputBackground,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.radius8),
-                      borderSide: BorderSide(color: Colors.grey.shade400),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.radius8),
-                    ),
-                  ),
+                  validator: (v) => (v == null || !v.contains('@')) ? "Enter a valid email" : null,
                 ),
                 const SizedBox(height: 40),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.actionPrimaryDefault,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppRadius.radiusFull,
-                        ),
-                      ),
-                    ),
-                    onPressed: _isLoading ? null : _handleReset,
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                            "Confirm",
-                            style: AppTypography.createStyle(
-                              fontSize: AppTypography.fontSize4,
-                              fontWeight: AppTypography.weightBold,
-                              lineHeight: AppTypography.lineHeight5,
-                            ).copyWith(color: colors.textButton),
-                          ),
-                  ),
+                PrimaryAuthButton(
+                  text: "Confirm",
+                  onPressed: _handleReset,
+                  isLoading: _isLoading,
                 ),
                 const SizedBox(height: 40),
                 Image.asset(
-                  'assets/images/cuate.png',
+                  'assets/images/forget_password.png',
                   height: 250,
                   fit: BoxFit.contain,
                 ),

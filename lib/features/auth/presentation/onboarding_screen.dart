@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 // Make sure these paths match your folder structure!
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../routes/app_routes.dart';
@@ -75,12 +76,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _skipToLogin() {
-    Navigator.pushReplacementNamed(context, AppRoutes.login);
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstTime', false);
   }
 
-  void _goToSignUp() {
-    Navigator.pushReplacementNamed(context, AppRoutes.signup);
+  void _skipToLogin() async {
+    await _completeOnboarding();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    }
+  }
+
+  void _goToSignUp() async {
+    await _completeOnboarding();
+    if (mounted) {
+      Navigator.pushReplacementNamed(context, AppRoutes.signup);
+    }
   }
 
   @override

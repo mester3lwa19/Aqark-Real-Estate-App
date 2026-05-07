@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import '../data/data.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../routes/app_routes.dart';
-import '../data/data.dart';
-// import '../repositories/auth_repository.dart';
+import 'widgets/auth_widgets.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -17,14 +18,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authRepo = AuthRepository();
+  final _confirmPasswordController = TextEditingController();
+  late final AuthRepository _authRepo;
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepo = GetIt.instance<AuthRepository>();
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -32,18 +42,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
-        // Repository handles cloud save and local SharedPreferences save
         await _authRepo.signUp(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
         if (mounted) {
-          // Send to login so they can verify their new credentials
-          Navigator.pushReplacementNamed(context, AppRoutes.login);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Account created! Please login.")),
-          );
+          // Navigate to OTP or Login depending on flow. User requested OTP screen implementation.
+          // Usually after signup we might verify OTP.
+          Navigator.pushNamed(context, AppRoutes.otpVerification);
         }
       } catch (e) {
         if (mounted) {
@@ -51,7 +58,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             SnackBar(
               content: Text(e.toString()),
               backgroundColor: Colors.redAccent,
-              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -67,7 +73,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing6),
@@ -75,8 +80,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 10),
-                Image.asset('assets/images/Aqark.png', height: 100),
+                const SizedBox(height: 40),
+                Image.asset('assets/images/aqark.png', height: 80),
                 const SizedBox(height: 30),
                 Text(
                   "Create an Account",
@@ -87,73 +92,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ).copyWith(color: colors.textPrimary),
                 ),
                 const SizedBox(height: 30),
-
-                _buildLabel("Email"),
-                TextFormField(
+                CustomAuthTextField(
                   controller: _emailController,
+                  label: "Email",
+                  hintText: "example@email.com",
+                  prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) =>
-                      value!.isEmpty ? "Please enter an email" : null,
-                  decoration: _inputDecoration(
-                    "example@email.com",
-                    Icons.email_outlined,
-                    colors,
-                  ),
+                  validator: (v) => (v == null || !v.contains('@'))
+                      ? "Enter a valid email"
+                      : null,
                 ),
                 const SizedBox(height: 20),
-
-                _buildLabel("Password"),
-                TextFormField(
+                CustomAuthTextField(
                   controller: _passwordController,
+                  label: "Password",
+                  hintText: "••••••",
+                  prefixIcon: Icons.lock_outline,
+                  isPassword: true,
                   obscureText: _obscurePassword,
-                  validator: (value) => value!.length < 6
+                  onToggleVisibility: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  validator: (v) => (v == null || v.length < 6)
                       ? "Password must be at least 6 characters"
                       : null,
-                  decoration: _inputDecoration(
-                    "********",
-                    Icons.lock_outline,
-                    colors,
-                    suffix: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                  ),
                 ),
-
-                const SizedBox(height: 40),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.actionPrimaryDefault,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppRadius.radiusFull,
-                        ),
-                      ),
-                    ),
-                    onPressed: _isLoading ? null : _handleSignUp,
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "Sign Up",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  ),
-                ),
-
                 const SizedBox(height: 20),
-
+                CustomAuthTextField(
+                  controller: _confirmPasswordController,
+                  label: "Confirm Password",
+                  hintText: "••••••",
+                  prefixIcon: Icons.lock_outline,
+                  isPassword: true,
+                  obscureText: _obscureConfirmPassword,
+                  onToggleVisibility: () => setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                  validator: (v) => (v != _passwordController.text)
+                      ? "Passwords do not match"
+                      : null,
+                ),
+                const SizedBox(height: 40),
+                PrimaryAuthButton(
+                  text: "Sign Up",
+                  onPressed: _handleSignUp,
+                  isLoading: _isLoading,
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        "Or Sign Up with",
+                        style: TextStyle(color: colors.textDisabled),
+                      ),
+                    ),
+                    const Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const SocialLoginRow(),
+                const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -167,12 +166,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         "Login",
                         style: TextStyle(
                           color: colors.actionPrimaryDefault,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: AppTypography.weightBold,
                         ),
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -180,29 +180,4 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
-
-  Widget _buildLabel(String text) => Align(
-    alignment: Alignment.centerLeft,
-    child: Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
-    ),
-  );
-
-  InputDecoration _inputDecoration(
-    String hint,
-    IconData icon,
-    AppSemanticColors colors, {
-    Widget? suffix,
-  }) => InputDecoration(
-    hintText: hint,
-    prefixIcon: Icon(icon),
-    suffixIcon: suffix,
-    filled: true,
-    fillColor: colors.inputBackground,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppRadius.radius8),
-      borderSide: BorderSide.none,
-    ),
-  );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'properties/presentation/home_screen.dart';
 import 'properties/presentation/favorites_screen.dart';
 import 'profile.dart';
+import '../core/theme/app_colors.dart';
 
 class MainHubScreen extends StatefulWidget {
   const MainHubScreen({super.key});
@@ -29,6 +30,12 @@ class _MainHubScreenState extends State<MainHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    // Using the orange primary color for active items to ensure visibility
+    const activeColor = Color(0xFFEA5A2D); 
+
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
@@ -38,8 +45,11 @@ class _MainHubScreenState extends State<MainHubScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
+        backgroundColor: theme.cardColor,
+        selectedItemColor: activeColor,
+        unselectedItemColor: isDark ? Colors.grey[600] : Colors.grey[400],
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontSize: 12),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),

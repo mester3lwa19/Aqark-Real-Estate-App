@@ -9,6 +9,7 @@ import '../../features/auth/data/data.dart';
 import '../../features/properties/data/data.dart';
 import '../database/database_helper.dart';
 import '../settings/settings_repository.dart';
+import '../settings/settings_controller.dart';
 
 Future<void> setupServiceLocator() async {
   final locator = GetIt.instance;
@@ -24,6 +25,7 @@ Future<void> setupServiceLocator() async {
   locator.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(locator()));
   locator.registerLazySingleton(() => DatabaseHelper.instance);
   locator.registerLazySingleton(() => SettingsRepository(locator()));
+  locator.registerLazySingleton(() => SettingsController(locator()));
 
   // Repository
   locator.registerLazySingleton(() => AuthRepository(

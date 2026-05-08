@@ -9,6 +9,7 @@ import 'core/theme/app_theme.dart';
 import 'routes/app_routes.dart';
 import 'routes/router_generator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/settings/settings_controller.dart';
 
 void main() async {
   // Ensure Flutter engine is ready
@@ -19,6 +20,10 @@ void main() async {
 
   // Setup Dependency Injection
   await setupServiceLocator();
+
+  // Load Settings
+  final settingsController = GetIt.instance<SettingsController>();
+  await settingsController.loadSettings();
 
   // Start background sync listener
   GetIt.instance<SyncService>().start();
@@ -34,37 +39,43 @@ void main() async {
   runApp(AqarkApp(
     isFirstTime: isFirstTime,
     isLoggedIn: isLoggedIn,
+    settingsController: settingsController,
   ));
 }
 
 class AqarkApp extends StatelessWidget {
   final bool isFirstTime;
   final bool isLoggedIn;
+  final SettingsController settingsController;
 
   const AqarkApp({
     super.key,
     required this.isFirstTime,
     required this.isLoggedIn,
+    required this.settingsController,
   });
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Aqark',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+    return ListenableBuilder(
+      listenable: settingsController,
+      builder: (context, _) {
+        return MaterialApp(
+          title: 'Aqark',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: settingsController.themeMode,
+          locale: settingsController.locale,
 
-      // --- SMART NAVIGATION ---
-      // 1. First-time open: Onboarding
-      // 2. Logged in: Home
-      // 3. Not logged in: Signup/Login
-      initialRoute: isFirstTime
-          ? AppRoutes.onboarding
-          : (isLoggedIn ? AppRoutes.mainHub : AppRoutes.signup),
+          // --- SMART NAVIGATION ---
+          initialRoute: isFirstTime
+              ? AppRoutes.onboarding
+              : (isLoggedIn ? AppRoutes.mainHub : AppRoutes.signup),
 
-      onGenerateRoute: RouterGenerator.generateRoute,
+          onGenerateRoute: RouterGenerator.generateRoute,
+        );
+      },
     );
   }
 }

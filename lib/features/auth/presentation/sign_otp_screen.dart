@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
@@ -14,29 +14,34 @@ class SignOtpScreen extends StatefulWidget {
 }
 
 class _SignOtpScreenState extends State<SignOtpScreen> {
-  final List<TextEditingController> _controllers = List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
   bool _isLoading = false;
 
-  @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
+  void _openEmailApp() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+    );
+    try {
+      if (await canLaunchUrl(emailLaunchUri)) {
+        await launchUrl(emailLaunchUri);
+      } else {
+        // If mailto doesn't work (e.g. emulator), just show a message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not open email app. Please open it manually.")),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please check your Gmail inbox.")),
+        );
+      }
     }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    super.dispose();
   }
 
-  void _handleConfirm() async {
-    setState(() => _isLoading = true);
-    // Simulation of verification logic
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) {
-      setState(() => _isLoading = false);
-      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.mainHub, (route) => false);
-    }
+  void _goToLogin() {
+    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
   }
 
   @override
@@ -61,8 +66,10 @@ class _SignOtpScreenState extends State<SignOtpScreen> {
               const SizedBox(height: 20),
               Image.asset('assets/images/aqark.png', height: 80),
               const SizedBox(height: 40),
+              Icon(Icons.mark_email_unread_outlined, size: 100, color: colors.actionPrimaryDefault),
+              const SizedBox(height: 30),
               Text(
-                "OTP Verification",
+                "Verify your email",
                 style: AppTypography.createStyle(
                   fontSize: AppTypography.fontSize6,
                   fontWeight: AppTypography.weightBold,
@@ -71,66 +78,32 @@ class _SignOtpScreenState extends State<SignOtpScreen> {
               ),
               const SizedBox(height: AppSpacing.spacing2),
               Text(
-                "Enter the 6-digit code sent to your email",
+                "We've sent a verification link to your email. Please click the link to activate your account.",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: colors.textDisabled),
-              ),
-              const SizedBox(height: 40),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(6, (index) => _buildOTPBox(index, colors)),
+                style: TextStyle(color: colors.textDisabled, fontSize: 16),
               ),
               const SizedBox(height: 40),
               PrimaryAuthButton(
-                text: "Confirm",
-                onPressed: _handleConfirm,
-                isLoading: _isLoading,
+                text: "Open Email App",
+                onPressed: _openEmailApp,
+                isLoading: false,
               ),
-              const SizedBox(height: 60),
-              Image.asset('assets/images/otp.png', height: 250),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: _goToLogin,
+                child: Text(
+                  "Already verified? Go to Login",
+                  style: TextStyle(
+                    color: colors.actionPrimaryDefault,
+                    fontWeight: AppTypography.weightBold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+              Image.asset('assets/images/otp.png', height: 200),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildOTPBox(int index, AppSemanticColors colors) {
-    return SizedBox(
-      width: 45,
-      child: TextFormField(
-        controller: _controllers[index],
-        focusNode: _focusNodes[index],
-        textAlign: TextAlign.center,
-        style: AppTypography.createStyle(
-          fontSize: AppTypography.fontSize5,
-          fontWeight: AppTypography.weightBold,
-          lineHeight: AppTypography.lineHeight6,
-        ),
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          LengthLimitingTextInputFormatter(1),
-        ],
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: colors.inputBackground,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.radius8),
-            borderSide: BorderSide(color: colors.borderSubtle),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppRadius.radius8),
-            borderSide: BorderSide(color: colors.borderFocused),
-          ),
-        ),
-        onChanged: (value) {
-          if (value.isNotEmpty && index < 5) {
-            _focusNodes[index + 1].requestFocus();
-          } else if (value.isEmpty && index > 0) {
-            _focusNodes[index - 1].requestFocus();
-          }
-        },
       ),
     );
   }

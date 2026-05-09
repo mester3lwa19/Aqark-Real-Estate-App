@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -19,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3, // Version 3 adds the 'type' column
+      version: 4, // Version 4 adds 'favorites' column to users table
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -31,6 +32,11 @@ class DatabaseHelper {
       await db.execute('DROP TABLE IF EXISTS favorites');
       await _createFavoritesTable(db);
     }
+    
+    if (oldVersion < 4) {
+      // Add favorites column to users table for property ID persistence
+      await db.execute('ALTER TABLE users ADD COLUMN favorites TEXT');
+    }
   }
 
   Future _createDB(Database db, int version) async {
@@ -41,6 +47,7 @@ class DatabaseHelper {
         name TEXT,
         phone TEXT,
         photo_url TEXT,
+        favorites TEXT,
         last_updated INTEGER
       )
     ''');
@@ -87,7 +94,6 @@ class DatabaseHelper {
   // --- Favorites CRUD ---
   Future<void> saveFavorite(Map<String, dynamic> propertyMap) async {
     final db = await instance.database;
-    // propertyMap should now contain 13 fields including 'type' and 'userid'
     await db.insert(
       'favorites',
       propertyMap,
@@ -149,9 +155,18 @@ class DatabaseHelper {
   // --- User CRUD ---
   Future<void> saveUser(Map<String, dynamic> userData) async {
     final db = await instance.database;
+    
+    // Create a copy to avoid mutating the original map
+    final Map<String, dynamic> data = Map.from(userData);
+    
+    // Handle favorites list conversion to JSON string
+    if (data['favorites'] != null && data['favorites'] is List) {
+      data['favorites'] = jsonEncode(data['favorites']);
+    }
+
     await db.insert(
       'users',
-      userData,
+      data,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -163,8 +178,22 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [uid],
     );
+    
     if (maps.isNotEmpty) {
-      return maps.first;
+      final Map<String, dynamic> user = Map.from(maps.first);
+      
+      // Parse JSON favorites back to List
+      if (user['favorites'] != null && user['favorites'] is String) {
+        try {
+          user['favorites'] = jsonDecode(user['favorites'] as String);
+        } catch (_) {
+          user['favorites'] = [];
+        }
+      } else {
+        user['favorites'] = [];
+      }
+      
+      return user;
     }
     return null;
   }

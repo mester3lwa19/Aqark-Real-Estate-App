@@ -7,6 +7,9 @@ class Property {
   final String imageUrl;
   final String ownerId;
   final int timestamp;
+  final int beds;
+  final int baths;
+  final int sqm;
 
   Property({
     required this.id,
@@ -17,6 +20,9 @@ class Property {
     required this.imageUrl,
     required this.ownerId,
     required this.timestamp,
+    this.beds = 0,
+    this.baths = 0,
+    this.sqm = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +35,9 @@ class Property {
       'imageUrl': imageUrl,
       'ownerId': ownerId,
       'timestamp': timestamp,
+      'beds': beds,
+      'baths': baths,
+      'sqm': sqm,
     };
   }
 
@@ -42,6 +51,9 @@ class Property {
       imageUrl: map['imageUrl'] ?? '',
       ownerId: map['ownerId'] ?? '',
       timestamp: map['timestamp'] ?? 0,
+      beds: map['beds'] ?? 0,
+      baths: map['baths'] ?? 0,
+      sqm: map['sqm'] ?? 0,
     );
   }
 }

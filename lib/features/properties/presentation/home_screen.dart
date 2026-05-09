@@ -301,6 +301,7 @@ class PropertyDisplay {
       id: id, title: title, description: description,
       price: price, address: address, imageUrl: imageUrl,
       ownerId: 'owner_$id', timestamp: DateTime.now().millisecondsSinceEpoch,
+      beds: beds, baths: baths, sqm: size,
     );
   }
 }
@@ -334,7 +335,7 @@ class PropertyCardPreview extends StatelessWidget {
           border: Border.all(color: colors.borderSubtle),
           boxShadow: isDark ? null : [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 24,
               offset: const Offset(0, 12),
             ),

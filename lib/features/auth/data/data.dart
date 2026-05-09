@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/database/database_helper.dart';
 import '../../../core/network/network_info.dart';
 
@@ -35,15 +36,27 @@ class AuthRepository {
     final cleanEmail = email.trim();
     final cleanPass = password.trim();
 
-    try {
-      if (await _networkInfo.isConnected) {
+    if (await _networkInfo.isConnected) {
+      try {
+        // 1. Firebase Auth
         UserCredential credential = await _auth.createUserWithEmailAndPassword(
           email: cleanEmail,
           password: cleanPass,
         );
 
+        // 2. Send Verification Email
+        try {
+          await credential.user?.sendEmailVerification();
+          debugPrint("Verification email sent to $cleanEmail");
+        } catch (e) {
+          debugPrint("Error sending verification email during signup: $e");
+          // Account is created, but email failed. We allow navigation to OTP screen
+          // where they can try to resend.
+        }
+
         final String uid = credential.user!.uid;
 
+        // 3. Local DB (sqflite)
         final userData = {
           'id': uid,
           'email': cleanEmail,
@@ -52,24 +65,47 @@ class AuthRepository {
           'last_updated': DateTime.now().millisecondsSinceEpoch,
         };
         await _dbHelper.saveUser(userData);
+
+        // 4. Remote DB (Firebase Realtime)
         await _dbRef.child(uid).set(userData);
+
+        // 5. Session State
         await _saveSession(cleanEmail, cleanPass);
 
         return credential;
-      } else {
-        final String localId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
-        final userData = {
-          'id': localId,
-          'email': cleanEmail,
-          'name': name ?? cleanEmail.split('@')[0],
-          'last_updated': DateTime.now().millisecondsSinceEpoch,
-        };
-        await _dbHelper.saveUser(userData);
-        await _saveSession(cleanEmail, cleanPass);
-        return null;
+      } catch (e) {
+        rethrow;
       }
-    } catch (e) {
-      rethrow;
+    } else {
+      // --- OFFLINE SIGNUP ---
+      final String localId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+      
+      final userData = {
+        'id': localId,
+        'email': cleanEmail,
+        'name': name ?? cleanEmail.split('@')[0],
+        'last_updated': DateTime.now().millisecondsSinceEpoch,
+      };
+      
+      await _dbHelper.saveUser(userData);
+      await _saveSession(cleanEmail, cleanPass);
+      
+      return null; 
+    }
+  }
+
+  // --- RESEND VERIFICATION ---
+  Future<void> sendVerificationEmail() async {
+    if (await _networkInfo.isConnected) {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.sendEmailVerification();
+        debugPrint("Verification email resent to ${user.email}");
+      } else {
+        throw "No user found to send verification email.";
+      }
+    } else {
+      throw "No internet connection to send verification email.";
     }
   }
 
@@ -92,7 +128,6 @@ class AuthRepository {
             final data = Map<String, dynamic>.from(snapshot.value as Map);
             await _dbHelper.saveUser(data);
           } else {
-            // If doesn't exist in remote but exists in auth, create entry
             final userData = {
               'id': uid,
               'email': cleanEmail,
@@ -124,32 +159,43 @@ class AuthRepository {
   }
 
   Future<Map<String, dynamic>?> getUserData() async {
+    Map<String, dynamic>? data;
+
     if (_auth.currentUser != null) {
       final uid = _auth.currentUser!.uid;
-      // Try local first
-      final localData = await _dbHelper.getUser(uid);
-      if (localData != null) return localData;
+      data = await _dbHelper.getUser(uid);
 
-      // Try remote if online
-      if (await _networkInfo.isConnected) {
+      if ((data == null || data['name'] == null) && await _networkInfo.isConnected) {
         final snapshot = await _dbRef.child(uid).get();
         if (snapshot.exists) {
-          final data = Map<String, dynamic>.from(snapshot.value as Map);
+          data = Map<String, dynamic>.from(snapshot.value as Map);
           await _dbHelper.saveUser(data);
-          return data;
         }
       }
+      
+      if (data == null || data['name'] == null) {
+        final user = _auth.currentUser!;
+        data = {
+          'id': user.uid,
+          'email': user.email,
+          'name': user.displayName ?? user.email?.split('@')[0] ?? "User",
+          'photo_url': user.photoURL,
+        };
+      }
     } else {
-      // Offline fallback: find by email
       final prefs = await SharedPreferences.getInstance();
       final email = prefs.getString(_keyEmail);
       if (email != null) {
          final db = await DatabaseHelper.instance.database;
          final maps = await db.query('users', where: 'email = ?', whereArgs: [email]);
-         if (maps.isNotEmpty) return maps.first;
+         if (maps.isNotEmpty) {
+           data = Map<String, dynamic>.from(maps.first);
+         } else {
+           data = {'email': email, 'name': email.split('@')[0]};
+         }
       }
     }
-    return null;
+    return data;
   }
 
   Future<void> updateProfile({String? name, String? photoUrl}) async {
@@ -169,6 +215,13 @@ class AuthRepository {
       if (name != null) await _auth.currentUser?.updateDisplayName(name);
       if (photoUrl != null) await _auth.currentUser?.updatePhotoURL(photoUrl);
     }
+  }
+
+  Future<bool> checkEmailVerified() async {
+    User? user = _auth.currentUser;
+    if (user == null) return true; // Offline bypass
+    await user.reload();
+    return _auth.currentUser?.emailVerified ?? false;
   }
 
   Future<void> _saveSession(String email, String password) async {

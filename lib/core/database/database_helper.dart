@@ -19,14 +19,23 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 3, // Version 3 adds the 'type' column
       onCreate: _createDB,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 3) {
+      // Drop and recreate table for development to ensure 'type' column exists
+      await db.execute('DROP TABLE IF EXISTS favorites');
+      await _createFavoritesTable(db);
+    }
   }
 
   Future _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE users (
+      CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         email TEXT NOT NULL,
         name TEXT,
@@ -36,29 +45,17 @@ class DatabaseHelper {
       )
     ''');
 
-    await db.execute('''
-      CREATE TABLE favorites (
-        id TEXT PRIMARY KEY,
-        title TEXT,
-        description TEXT,
-        price REAL,
-        address TEXT,
-        imageUrl TEXT,
-        ownerId TEXT,
-        timestamp INTEGER,
-        userId TEXT
-      )
-    ''');
+    await _createFavoritesTable(db);
 
     await db.execute('''
-      CREATE TABLE settings (
+      CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT
       )
     ''');
 
     await db.execute('''
-      CREATE TABLE sync_queue (
+      CREATE TABLE IF NOT EXISTS sync_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         action TEXT NOT NULL,
         payload TEXT NOT NULL,
@@ -67,32 +64,30 @@ class DatabaseHelper {
     ''');
   }
 
-  // --- User ---
-  Future<void> saveUser(Map<String, dynamic> userData) async {
-    final db = await instance.database;
-    await db.insert(
-      'users',
-      userData,
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+  Future _createFavoritesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS favorites (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        description TEXT,
+        price REAL,
+        address TEXT,
+        imageUrl TEXT,
+        ownerId TEXT,
+        timestamp INTEGER,
+        beds INTEGER,
+        baths INTEGER,
+        sqm INTEGER,
+        type TEXT,
+        userid TEXT
+      )
+    ''');
   }
 
-  Future<Map<String, dynamic>?> getUser(String uid) async {
-    final db = await instance.database;
-    final maps = await db.query(
-      'users',
-      where: 'id = ?',
-      whereArgs: [uid],
-    );
-    if (maps.isNotEmpty) {
-      return maps.first;
-    }
-    return null;
-  }
-
-  // --- Favorites ---
+  // --- Favorites CRUD ---
   Future<void> saveFavorite(Map<String, dynamic> propertyMap) async {
     final db = await instance.database;
+    // propertyMap should now contain 13 fields including 'type' and 'userid'
     await db.insert(
       'favorites',
       propertyMap,
@@ -100,12 +95,12 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> removeFavorite(String propertyId) async {
+  Future<void> removeFavorite(String propertyId, String userId) async {
     final db = await instance.database;
     await db.delete(
       'favorites',
-      where: 'id = ?',
-      whereArgs: [propertyId],
+      where: 'id = ? AND userid = ?',
+      whereArgs: [propertyId, userId],
     );
   }
 
@@ -113,12 +108,22 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.query(
       'favorites',
-      where: 'userId = ?',
+      where: 'userid = ?',
       whereArgs: [userId],
     );
   }
 
-  // --- Settings ---
+  Future<bool> isFavorite(String propertyId, String userId) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'favorites',
+      where: 'id = ? AND userid = ?',
+      whereArgs: [propertyId, userId],
+    );
+    return maps.isNotEmpty;
+  }
+
+  // --- Settings CRUD ---
   Future<void> saveSetting(String key, String value) async {
     final db = await instance.database;
     await db.insert(
@@ -141,9 +146,34 @@ class DatabaseHelper {
     return null;
   }
 
+  // --- User CRUD ---
+  Future<void> saveUser(Map<String, dynamic> userData) async {
+    final db = await instance.database;
+    await db.insert(
+      'users',
+      userData,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, dynamic>?> getUser(String uid) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [uid],
+    );
+    if (maps.isNotEmpty) {
+      return maps.first;
+    }
+    return null;
+  }
+
   Future<void> clearDatabase() async {
     final db = await instance.database;
     await db.delete('users');
     await db.delete('sync_queue');
+    await db.delete('favorites');
+    await db.delete('settings');
   }
 }

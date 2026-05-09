@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import '../data/data.dart';
 import '../models/models.dart';
+import '../../favorites.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
@@ -17,36 +17,21 @@ class PropertyDetailsScreen extends StatefulWidget {
 }
 
 class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
-  late final PropertyRepository _propertyRepo;
-  bool _isFavorite = false;
-  bool _isLoadingFavorite = true;
+  late final FavoritesController _favoritesController;
   int _activeTab = 0; // 0: About, 1: 3d Tour, 2: Review
   bool _isDescriptionExpanded = false;
 
   @override
   void initState() {
     super.initState();
-    _propertyRepo = GetIt.instance<PropertyRepository>();
-    _checkIfFavorite();
-  }
-
-  Future<void> _checkIfFavorite() async {
-    final favorites = await _propertyRepo.getFavorites();
-    if (mounted) {
-      setState(() {
-        _isFavorite = favorites.any((p) => p.id == widget.property.id);
-        _isLoadingFavorite = false;
-      });
-    }
+    _favoritesController = GetIt.instance<FavoritesController>();
   }
 
   void _toggleFavorite() async {
-    setState(() => _isFavorite = !_isFavorite);
     try {
-      await _propertyRepo.toggleFavorite(widget.property);
+      await _favoritesController.toggleFavorite(widget.property);
     } catch (e) {
       if (mounted) {
-        setState(() => _isFavorite = !_isFavorite); // Revert
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: $e")),
         );
@@ -60,216 +45,261 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final colors = isDark ? AppSemanticColors.dark : AppSemanticColors.light;
 
-    return Scaffold(
-      backgroundColor: colors.surfaceBackground,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Property Details",
-          style: AppTypography.createStyle(
-            fontSize: AppTypography.fontSize4,
-            fontWeight: AppTypography.weightBold,
-            lineHeight: AppTypography.lineHeight5,
-          ).copyWith(color: colors.textPrimary),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.red : colors.textPrimary,
+    return ListenableBuilder(
+      listenable: _favoritesController,
+      builder: (context, _) {
+        final isFavorite = _favoritesController.isFavorite(widget.property.id);
+        
+        return Scaffold(
+          backgroundColor: colors.surfaceBackground,
+          appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: colors.textPrimary),
+              onPressed: () => Navigator.pop(context),
             ),
-            onPressed: _isLoadingFavorite ? null : _toggleFavorite,
-          ),
-          IconButton(
-            icon: Icon(Icons.share_outlined, color: colors.textPrimary),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.outlined_flag, color: colors.textPrimary),
-            onPressed: () {},
-          ),
-        ],
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Main Image
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.radius24),
-                child: Stack(
-                  children: [
-                    Image.network(
-                      widget.property.imageUrl.isNotEmpty
-                          ? widget.property.imageUrl
-                          : 'https://via.placeholder.com/600x400',
-                      height: 300,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text(
-                          "1/8 Photos",
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                      ),
-                    ),
-                  ],
+            title: Text(
+              "Property Details",
+              style: AppTypography.createStyle(
+                fontSize: AppTypography.fontSize4,
+                fontWeight: AppTypography.weightBold,
+                lineHeight: AppTypography.lineHeight5,
+              ).copyWith(color: colors.textPrimary),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : colors.textPrimary,
                 ),
+                onPressed: _toggleFavorite,
               ),
-            ),
-            const SizedBox(height: 12),
-            // Thumbnails
-            SizedBox(
-              height: 70,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
-                scrollDirection: Axis.horizontal,
-                itemCount: 4,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(AppRadius.radius8),
-                      child: Stack(
-                        children: [
-                          Image.network(
-                            widget.property.imageUrl,
-                            width: 70,
-                            height: 70,
-                            fit: BoxFit.cover,
-                          ),
-                          if (index == 3)
-                            Container(
-                              width: 70,
-                              height: 70,
-                              color: Colors.black.withValues(alpha: 0.4),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                "+4",
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+              IconButton(
+                icon: Icon(Icons.share_outlined, color: colors.textPrimary),
+                onPressed: () {},
               ),
-            ),
-            const SizedBox(height: 16),
-            // Title and Rating
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.property.title,
-                      style: AppTypography.createStyle(
-                        fontSize: AppTypography.fontSize5,
-                        fontWeight: AppTypography.weightBold,
-                        lineHeight: AppTypography.lineHeight6,
-                      ).copyWith(color: colors.textPrimary),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colors.actionPrimaryDefault.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Row(
+              IconButton(
+                icon: Icon(Icons.outlined_flag, color: colors.textPrimary),
+                onPressed: () {},
+              ),
+            ],
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Main Image
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppRadius.radius24),
+                    child: Stack(
                       children: [
-                        Icon(Icons.star, size: 14, color: colors.actionPrimaryDefault),
-                        const SizedBox(width: 4),
-                        Text(
-                          "4.5",
-                          style: TextStyle(
-                            color: colors.actionPrimaryDefault,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                        Image.network(
+                          widget.property.imageUrl.isNotEmpty
+                              ? widget.property.imageUrl
+                              : 'https://via.placeholder.com/600x400',
+                          height: 300,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                        Positioned(
+                          bottom: 16,
+                          right: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              "1/8 Photos",
+                              style: TextStyle(color: Colors.white, fontSize: 12),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Price
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
-              child: Text(
-                "${widget.property.price.toStringAsFixed(0)} EGP",
-                style: AppTypography.createStyle(
-                  fontSize: AppTypography.fontSize6,
-                  fontWeight: AppTypography.weightExtraBold,
-                  lineHeight: AppTypography.lineHeight7,
-                ).copyWith(color: colors.actionPrimaryDefault),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Specs (Bed, Bath, Sqm)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: colors.borderSubtle),
-                  borderRadius: BorderRadius.circular(AppRadius.radius16),
-                  color: colors.surfaceCard,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildSpecItem(Icons.bed_outlined, "${widget.property.beds} Bed", colors),
-                    _buildSpecItem(Icons.bathtub_outlined, "${widget.property.baths} Bath", colors),
-                    _buildSpecItem(Icons.architecture, "${widget.property.sqm} sqm", colors),
-                  ],
+                const SizedBox(height: 12),
+                // Thumbnails
+                SizedBox(
+                  height: 70,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 4,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.radius8),
+                          child: Stack(
+                            children: [
+                              Image.network(
+                                widget.property.imageUrl.isNotEmpty
+                                    ? widget.property.imageUrl
+                                    : 'https://via.placeholder.com/150',
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                              ),
+                              if (index == 3)
+                                Container(
+                                  width: 70,
+                                  height: 70,
+                                  color: Colors.black.withValues(alpha: 0.4),
+                                  alignment: Alignment.center,
+                                  child: const Text(
+                                    "+4",
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
+                const SizedBox(height: 16),
+                // Title and Rating
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.property.title,
+                          style: AppTypography.createStyle(
+                            fontSize: AppTypography.fontSize5,
+                            fontWeight: AppTypography.weightBold,
+                            lineHeight: AppTypography.lineHeight6,
+                          ).copyWith(color: colors.textPrimary),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: colors.actionPrimaryDefault.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.star, size: 14, color: colors.actionPrimaryDefault),
+                            const SizedBox(width: 4),
+                            Text(
+                              "4.5",
+                              style: TextStyle(
+                                color: colors.actionPrimaryDefault,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Price
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
+                  child: Text(
+                    "${widget.property.price.toStringAsFixed(0)} EGP",
+                    style: AppTypography.createStyle(
+                      fontSize: AppTypography.fontSize6,
+                      fontWeight: AppTypography.weightExtraBold,
+                      lineHeight: AppTypography.lineHeight7,
+                    ).copyWith(color: colors.actionPrimaryDefault),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Specs (Bed, Bath, Sqm)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: colors.borderSubtle),
+                      borderRadius: BorderRadius.circular(AppRadius.radius16),
+                      color: colors.surfaceCard,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildSpecItem(Icons.bed_outlined, "${widget.property.beds} Bed", colors),
+                        _buildSpecItem(Icons.bathtub_outlined, "${widget.property.baths} Bath", colors),
+                        _buildSpecItem(Icons.architecture, "${widget.property.sqm} sqm", colors),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Tabs
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildTabItem("About", 0, colors),
+                      _buildTabItem("3d Tour", 1, colors),
+                      _buildTabItem("Review", 2, colors),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                const SizedBox(height: 16),
+                // Tab Content
+                _buildTabContent(colors),
+                const SizedBox(height: 80), // For bottom nav
+              ],
+            ),
+          ),
+          bottomNavigationBar: _buildActionBottomBar(colors),
+        );
+      },
+    );
+  }
+
+  Widget _buildActionBottomBar(AppSemanticColors colors) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.spacing4),
+      decoration: BoxDecoration(
+        color: colors.surfaceCard,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.actionPrimaryDefault,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.radius16),
+                  ),
+                ),
+                child: const Text("Book a Visit", style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
-            const SizedBox(height: 24),
-            // Tabs
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildTabItem("About", 0, colors),
-                  _buildTabItem("3d Tour", 1, colors),
-                  _buildTabItem("Review", 2, colors),
-                ],
-              ),
-            ),
-            const Divider(),
-            const SizedBox(height: 16),
-            // Tab Content
-            _buildTabContent(colors),
-            const SizedBox(height: 80), // For bottom nav
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(colors),
     );
   }
 
@@ -391,13 +421,6 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                         ],
                       ),
                     ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chat_bubble_outline, size: 20),
-                  onPressed: () => Navigator.pushNamed(context, AppRoutes.chatThread),
-                  style: IconButton.styleFrom(
-                    side: BorderSide(color: colors.borderSubtle),
                   ),
                 ),
                 IconButton(
@@ -665,10 +688,6 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               const Icon(Icons.favorite_border, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
               const Text("12", style: TextStyle(fontSize: 12, color: Colors.grey)),
-              const SizedBox(width: 16),
-              const Icon(Icons.chat_bubble_outline, size: 16, color: Colors.grey),
-              const SizedBox(width: 4),
-              const Text("3", style: TextStyle(fontSize: 12, color: Colors.grey)),
               const Spacer(),
               const Icon(Icons.share_outlined, size: 16, color: Colors.grey),
               const SizedBox(width: 16),
@@ -695,7 +714,6 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
         BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
         BottomNavigationBarItem(icon: Icon(Icons.compare_arrows), label: "Compare"),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: "Chat"),
         BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
       ],
     );

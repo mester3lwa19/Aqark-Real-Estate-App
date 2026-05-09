@@ -119,6 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text("Profile"),
         elevation: 0,
         backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
       ),
       body: ListenableBuilder(
         listenable: _settingsController,

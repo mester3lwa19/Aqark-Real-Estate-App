@@ -10,6 +10,7 @@ class Property {
   final int beds;
   final int baths;
   final int sqm;
+  final String type;
 
   Property({
     required this.id,
@@ -23,6 +24,7 @@ class Property {
     this.beds = 0,
     this.baths = 0,
     this.sqm = 0,
+    this.type = 'Apartment',
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class Property {
       'beds': beds,
       'baths': baths,
       'sqm': sqm,
+      'type': type,
     };
   }
 
@@ -54,6 +57,7 @@ class Property {
       beds: map['beds'] ?? 0,
       baths: map['baths'] ?? 0,
       sqm: map['sqm'] ?? 0,
+      type: map['type'] ?? 'Apartment',
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'properties/presentation/home_screen.dart';
 import 'properties/presentation/favorites_screen.dart';
+import 'properties/presentation/search_screen.dart';
 import 'profile.dart';
-import '../core/theme/app_colors.dart';
 
 class MainHubScreen extends StatefulWidget {
   const MainHubScreen({super.key});
@@ -16,9 +16,8 @@ class _MainHubScreenState extends State<MainHubScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
+    const SearchScreen(),
     const FavoritesScreen(),
-    const Center(child: Text('Compare')),
-    const Center(child: Text('Chat')),
     const ProfileScreen(),
   ];
 
@@ -52,9 +51,8 @@ class _MainHubScreenState extends State<MainHubScreen> {
         unselectedLabelStyle: const TextStyle(fontSize: 12),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.compare_arrows), label: 'Compare'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
+          BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_outline), label: 'Favorites'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),

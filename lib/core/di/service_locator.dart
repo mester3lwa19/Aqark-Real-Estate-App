@@ -7,6 +7,7 @@ import '../network/network_info.dart';
 import '../network/sync_service.dart';
 import '../../features/auth/data/data.dart';
 import '../../features/properties/data/data.dart';
+import '../../features/favorites.dart';
 import '../database/database_helper.dart';
 import '../settings/settings_repository.dart';
 import '../settings/settings_controller.dart';
@@ -40,6 +41,8 @@ Future<void> setupServiceLocator() async {
         dbHelper: locator(),
         networkInfo: locator(),
       ));
+
+  locator.registerLazySingleton(() => FavoritesController(locator(), locator()));
 
   // Services
   locator.registerLazySingleton(() => SyncService(

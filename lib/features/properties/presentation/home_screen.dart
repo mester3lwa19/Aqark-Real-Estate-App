@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_dimensions.dart';
 import '../../../routes/app_routes.dart';
 import '../models/models.dart';
 
@@ -12,14 +13,19 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> _categories = [
+    'All',
     'Apartment',
-    'Villa',
-    'Studio',
     'Duplex',
-    'Penthouse',
-    'Commercial',
+    'Villa',
+    'Townhouse',
+    'Studio',
   ];
-  final String _activeCategory = 'Apartment';
+  String _activeCategory = 'All';
+
+  List<PropertyDisplay> get _filteredProperties {
+    if (_activeCategory == 'All') return _properties;
+    return _properties.where((p) => p.type == _activeCategory).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,14 +41,15 @@ class _HomeScreenState extends State<HomeScreen> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spacing4,
+                  vertical: AppSpacing.spacing5,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildTopBar(context, colors),
-                    const SizedBox(height: 24),
-                    _buildSearchBar(context, isDark, colors),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.spacing6),
                     _buildCategories(context, isDark, colors),
                   ],
                 ),
@@ -50,7 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spacing4,
+                  vertical: AppSpacing.spacing3,
+                ),
                 child: Text(
                   'Discover Properties',
                   style: theme.textTheme.headlineSmall?.copyWith(
@@ -60,21 +70,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final property = _properties[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: PropertyCardPreview(property: property),
-                  );
-                },
-                childCount: _properties.length,
-              ),
-            ),
+            _buildPropertyList(colors),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.spacing4,
+                  AppSpacing.spacing6,
+                  AppSpacing.spacing4,
+                  AppSpacing.spacing3,
+                ),
                 child: Text(
                   'Meet Our Expert Brokers',
                   style: theme.textTheme.headlineSmall?.copyWith(
@@ -85,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing4),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -96,15 +100,60 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
+                  mainAxisSpacing: AppSpacing.spacing3,
+                  crossAxisSpacing: AppSpacing.spacing3,
                   childAspectRatio: 0.75,
                 ),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.spacing6)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPropertyList(AppSemanticColors colors) {
+    final filtered = _filteredProperties;
+
+    if (filtered.isEmpty) {
+      return SliverToBoxAdapter(
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.spacing10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.search_off, size: 64, color: colors.textDisabled),
+              const SizedBox(height: AppSpacing.spacing4),
+              Text(
+                'No properties found in this category',
+                style: TextStyle(color: colors.textSecondary, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final property = filtered[index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.spacing4,
+              vertical: AppSpacing.spacing2,
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: PropertyCardPreview(
+                key: ValueKey(property.id),
+                property: property,
+              ),
+            ),
+          );
+        },
+        childCount: filtered.length,
       ),
     );
   }
@@ -117,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 48,
           decoration: BoxDecoration(
             color: colors.actionPrimaryDefault,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.radius16),
           ),
           alignment: Alignment.center,
           child: const Text(
@@ -129,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.spacing3),
         Expanded(
           child: Text(
             'Aqark',
@@ -144,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 44,
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppRadius.radius16),
             border: Border.all(color: colors.borderSubtle),
           ),
           child: Icon(Icons.notifications_none, color: colors.textPrimary),
@@ -153,32 +202,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSearchBar(BuildContext context, bool isDark, AppSemanticColors colors) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colors.borderSubtle),
-      ),
-      child: TextField(
-        style: TextStyle(color: colors.textPrimary),
-        decoration: InputDecoration(
-          hintText: 'Search properties...',
-          hintStyle: TextStyle(color: colors.textDisabled),
-          prefixIcon: Icon(Icons.search, color: colors.actionPrimaryDefault),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCategories(BuildContext context, bool isDark, AppSemanticColors colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 14),
+          padding: const EdgeInsets.only(bottom: AppSpacing.spacing3),
           child: Text(
             'Categories',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -192,25 +221,37 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: _categories.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.spacing2),
             itemBuilder: (context, index) {
               final category = _categories[index];
               final isActive = category == _activeCategory;
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isActive ? colors.actionPrimaryDefault : Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isActive ? Colors.transparent : colors.borderSubtle,
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _activeCategory = category;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.spacing4,
+                    vertical: AppSpacing.spacing3,
                   ),
-                ),
-                child: Center(
-                  child: Text(
-                    category,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: isActive ? Colors.white : colors.textSecondary,
+                  decoration: BoxDecoration(
+                    color: isActive ? colors.actionPrimaryDefault : Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(AppRadius.radius16),
+                    border: Border.all(
+                      color: isActive ? Colors.transparent : colors.borderSubtle,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      category,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isActive ? Colors.white : colors.textSecondary,
+                      ),
                     ),
                   ),
                 ),
@@ -234,6 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
       description: 'A stunning villa with a private pool, open terraces, and sea breeze living.',
       imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80',
       address: 'Glim, Alexandria',
+      type: 'Villa',
     ),
     PropertyDisplay(
       id: 'prop_2',
@@ -246,6 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
       description: 'Bright studio with beach access and modern finishes for easy coastal living.',
       imageUrl: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80',
       address: 'Cleopatra, Alexandria',
+      type: 'Studio',
     ),
     PropertyDisplay(
       id: 'prop_3',
@@ -258,6 +301,20 @@ class _HomeScreenState extends State<HomeScreen> {
       description: 'Spacious family residence with leafy views and elegant living spaces.',
       imageUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=900&q=80',
       address: 'Maadi, Cairo',
+      type: 'Apartment',
+    ),
+    PropertyDisplay(
+      id: 'prop_4',
+      title: 'Luxury Duplex in Zayed',
+      location: 'Sheikh Zayed, Cairo',
+      price: 7500000,
+      beds: 5,
+      baths: 4,
+      size: 400,
+      description: 'Extravagant duplex with private garden and high-end finishes.',
+      imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80',
+      address: 'Sheikh Zayed, Cairo',
+      type: 'Duplex',
     ),
   ];
 
@@ -288,12 +345,13 @@ class PropertyDisplay {
   final String description;
   final String imageUrl;
   final String address;
+  final String type;
 
   PropertyDisplay({
     required this.id, required this.title, required this.location,
     required this.price, required this.beds, required this.baths,
     required this.size, required this.description, required this.imageUrl,
-    required this.address,
+    required this.address, required this.type,
   });
 
   Property toProperty() {
@@ -301,7 +359,7 @@ class PropertyDisplay {
       id: id, title: title, description: description,
       price: price, address: address, imageUrl: imageUrl,
       ownerId: 'owner_$id', timestamp: DateTime.now().millisecondsSinceEpoch,
-      beds: beds, baths: baths, sqm: size,
+      beds: beds, baths: baths, sqm: size, type: type,
     );
   }
 }
@@ -327,11 +385,11 @@ class PropertyCardPreview extends StatelessWidget {
 
     return InkWell(
       onTap: () => Navigator.pushNamed(context, AppRoutes.propertyDetails, arguments: property.toProperty()),
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(AppRadius.radius24),
       child: Container(
         decoration: BoxDecoration(
           color: theme.cardColor,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadius.radius24),
           border: Border.all(color: colors.borderSubtle),
           boxShadow: isDark ? null : [
             BoxShadow(
@@ -344,16 +402,35 @@ class PropertyCardPreview extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              child: SizedBox(
-                height: 180,
-                width: double.infinity,
-                child: Image.network(property.imageUrl, fit: BoxFit.cover),
-              ),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.radius24)),
+                  child: SizedBox(
+                    height: 180,
+                    width: double.infinity,
+                    child: Image.network(property.imageUrl, fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(AppRadius.radius8),
+                    ),
+                    child: Text(
+                      property.type,
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
             ),
             Padding(
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(AppSpacing.spacing4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -361,12 +438,12 @@ class PropertyCardPreview extends StatelessWidget {
                     property.location,
                     style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700, color: colors.textPrimary),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.spacing2),
                   Text(
                     '${property.price.toStringAsFixed(0)} EGP',
                     style: TextStyle(color: colors.actionPrimaryDefault, fontWeight: FontWeight.w700, fontSize: 18),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.spacing3),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -375,13 +452,13 @@ class PropertyCardPreview extends StatelessWidget {
                       _buildDetailChip(context, Icons.square_foot, '${property.size} m²', colors),
                     ],
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: AppSpacing.spacing4),
                   Container(
                     width: double.infinity,
                     height: 48,
                     decoration: BoxDecoration(
                       color: colors.actionPrimaryDefault,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppRadius.radius16),
                     ),
                     child: const Center(
                       child: Text('View details', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -400,7 +477,7 @@ class PropertyCardPreview extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 18, color: colors.textSecondary),
-        const SizedBox(width: 6),
+        const SizedBox(width: AppSpacing.spacing1),
         Text(label, style: TextStyle(fontSize: 13, color: colors.textSecondary, fontWeight: FontWeight.w600)),
       ],
     );
@@ -420,13 +497,13 @@ class BrokerCardPreview extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppRadius.radius24),
         border: Border.all(color: colors.borderSubtle),
       ),
       child: Column(
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.radius24)),
             child: SizedBox(
               height: 110,
               width: double.infinity,
@@ -434,16 +511,16 @@ class BrokerCardPreview extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.spacing3),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(broker.name, style: TextStyle(fontWeight: FontWeight.w700, color: colors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.spacing1),
                 Row(
                   children: [
                     const Icon(Icons.star, size: 14, color: Color(0xFFFFD511)),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.spacing1),
                     Text('${broker.rating}', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: colors.textPrimary)),
                   ],
                 ),

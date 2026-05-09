@@ -15,16 +15,10 @@ class AppRoutes {
   // --- Property Flow ---
   static const String filter = '/filter';
   static const String searchResults = '/search_results';
+  static const String search = '/search';
   static const String propertyDetails = '/property_details';
-
-  // --- Comparison Flow ---
-  static const String selectToCompare = '/select_to_compare';
-  static const String comparisonResult = '/comparison_result';
 
   // --- Profile & Settings Flow ---
   static const String editProfile = '/edit_profile';
   static const String propertyAlerts = '/property_alerts';
-
-  // --- Chat Flow ---
-  static const String chatThread = '/chat_thread';
 }

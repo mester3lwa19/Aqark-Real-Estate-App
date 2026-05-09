@@ -34,16 +34,13 @@ class PropertyRepository {
     final isFavorite = favorites.any((element) => element['id'] == property.id);
 
     if (isFavorite) {
-      await _dbHelper.removeFavorite(property.id);
+      await _dbHelper.removeFavorite(property.id, uid );
       if (await _networkInfo.isConnected) {
         await _favoritesRef.child(property.id).remove();
-      } else {
-        // Queue for sync: this could be a more complex sync queue implementation
-        // For now we'll rely on the full sync on reconnect
       }
     } else {
       final propertyMap = property.toMap();
-      propertyMap['userId'] = uid;
+      propertyMap['userid'] = uid; // Match database column name
       await _dbHelper.saveFavorite(propertyMap);
       if (await _networkInfo.isConnected) {
         await _favoritesRef.child(property.id).set(propertyMap);
@@ -56,21 +53,25 @@ class PropertyRepository {
     if (uid == null) return [];
 
     if (await _networkInfo.isConnected) {
-      final snapshot = await _favoritesRef.get();
-      if (snapshot.exists) {
-        final List<Property> remoteFavorites = [];
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        data.forEach((key, value) {
-          remoteFavorites.add(Property.fromMap(Map<String, dynamic>.from(value)));
-        });
-        
-        // Update local database with remote favorites
-        for (var property in remoteFavorites) {
-          final map = property.toMap();
-          map['userId'] = uid;
-          await _dbHelper.saveFavorite(map);
+      try {
+        final snapshot = await _favoritesRef.get();
+        if (snapshot.exists) {
+          final List<Property> remoteFavorites = [];
+          final data = snapshot.value as Map<dynamic, dynamic>;
+          data.forEach((key, value) {
+            remoteFavorites.add(Property.fromMap(Map<String, dynamic>.from(value)));
+          });
+          
+          // Update local database with remote favorites
+          for (var property in remoteFavorites) {
+            final map = property.toMap();
+            map['userid'] = uid; // Match database column name
+            await _dbHelper.saveFavorite(map);
+          }
+          return remoteFavorites;
         }
-        return remoteFavorites;
+      } catch (e) {
+        print("Error fetching remote favorites: $e");
       }
     }
 
@@ -85,19 +86,14 @@ class PropertyRepository {
 
     final localFavorites = await _dbHelper.getFavorites(uid);
     
-    // Simple sync: push local to remote
-    // In a production app, you'd want timestamp-based merging
     for (var favorite in localFavorites) {
       await _favoritesRef.child(favorite['id']).set(favorite);
     }
     
-    // Also pull remote to local to ensure everything is synced
     await getFavorites();
   }
 
   Future<List<Property>> getProperties({String? query}) async {
-    // In a real app, this would fetch from Firebase or a local cache
-    // For now, let's return some mock data and filter it if query is provided
     final mockProperties = [
       Property(
         id: '1',
@@ -105,9 +101,13 @@ class PropertyRepository {
         description: 'A beautiful modern villa with 5 bedrooms and a private pool.',
         price: 12500000,
         address: 'New Cairo, Egypt',
-        imageUrl: '',
+        imageUrl: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&q=80',
         ownerId: 'owner1',
         timestamp: DateTime.now().millisecondsSinceEpoch,
+        beds: 5,
+        baths: 4,
+        sqm: 450,
+        type: 'Villa',
       ),
       Property(
         id: '2',
@@ -115,9 +115,13 @@ class PropertyRepository {
         description: 'Spacious apartment with a view of the city skyline.',
         price: 4200000,
         address: 'Sheikh Zayed, Egypt',
-        imageUrl: '',
+        imageUrl: 'https://images.unsplash.com/photo-1545324418-f1d3c5b53574?auto=format&fit=crop&w=800&q=80',
         ownerId: 'owner2',
         timestamp: DateTime.now().millisecondsSinceEpoch,
+        beds: 3,
+        baths: 2,
+        sqm: 180,
+        type: 'Apartment',
       ),
       Property(
         id: '3',
@@ -125,9 +129,13 @@ class PropertyRepository {
         description: 'Perfect for young professionals, close to all amenities.',
         price: 1800000,
         address: 'Maadi, Cairo',
-        imageUrl: '',
+        imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
         ownerId: 'owner3',
         timestamp: DateTime.now().millisecondsSinceEpoch,
+        beds: 1,
+        baths: 1,
+        sqm: 65,
+        type: 'Studio',
       ),
     ];
 

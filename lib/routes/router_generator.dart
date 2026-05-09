@@ -13,6 +13,8 @@ import '../features/properties/presentation/property_details_screen.dart';
 import '../features/properties/models/models.dart';
 import '../features/main_hub_screen.dart';
 
+import '../features/properties/presentation/search_screen.dart';
+
 class RouterGenerator {
   static Route generateRoute(RouteSettings settings) {
     // You can extract arguments here for screens that need them
@@ -52,9 +54,9 @@ class RouterGenerator {
           builder: (_) => _buildDummyScreen('Filter Options'),
         );
       case AppRoutes.searchResults:
-        return MaterialPageRoute(
-          builder: (_) => _buildDummyScreen('Search Results / Empty State'),
-        );
+        return MaterialPageRoute(builder: (_) => const SearchScreen());
+      case AppRoutes.search:
+        return MaterialPageRoute(builder: (_) => const SearchScreen());
       case AppRoutes.propertyDetails:
         final property = settings.arguments as Property;
         return MaterialPageRoute(
@@ -62,19 +64,7 @@ class RouterGenerator {
         );
 
       // ----------------------------------------
-      // 4. COMPARISON FLOW
-      // ----------------------------------------
-      case AppRoutes.selectToCompare:
-        return MaterialPageRoute(
-          builder: (_) => _buildDummyScreen('Select Properties to Compare'),
-        );
-      case AppRoutes.comparisonResult:
-        return MaterialPageRoute(
-          builder: (_) => _buildDummyScreen('Comparison Results Table'),
-        );
-
-      // ----------------------------------------
-      // 5. PROFILE & MESSAGES EXPANSIONS
+      // 4. PROFILE & MESSAGES EXPANSIONS
       // ----------------------------------------
       case AppRoutes.editProfile:
         return MaterialPageRoute(
@@ -83,10 +73,6 @@ class RouterGenerator {
       case AppRoutes.propertyAlerts:
         return MaterialPageRoute(
           builder: (_) => _buildDummyScreen('Property Alerts'),
-        );
-      case AppRoutes.chatThread:
-        return MaterialPageRoute(
-          builder: (_) => _buildDummyScreen('Direct Chat Thread'),
         );
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
@@ -105,7 +91,6 @@ class RouterGenerator {
   }
 
   // A temporary helper to generate screens so your app compiles instantly.
-  // Delete this and replace it with your actual screen imports as you build them.
   static Widget _buildDummyScreen(String title) {
     return Scaffold(
       appBar: AppBar(title: Text(title)),

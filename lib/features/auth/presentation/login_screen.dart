@@ -43,11 +43,33 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         if (success && mounted) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            AppRoutes.mainHub,
-            (route) => false,
-          );
+          // Check if email is verified
+          final isVerified = await _authRepo.checkEmailVerified();
+          
+          if (!isVerified) {
+            // If not verified, show message and redirect to verification screen
+            // We sign out to prevent the session from staying active in an unverified state if that's your policy
+            await _authRepo.signOut();
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Please verify your email before logging in."),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+              Navigator.pushNamed(context, AppRoutes.otpVerification);
+            }
+          } else {
+            // Verified, go to home
+            if (mounted) {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                AppRoutes.mainHub,
+                (route) => false,
+              );
+            }
+          }
         }
       } catch (e) {
         if (mounted) {

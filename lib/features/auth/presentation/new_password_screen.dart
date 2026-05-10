@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../routes/app_routes.dart';
@@ -32,26 +32,30 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing6),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.spacing6),
           child: Form(
             key: _formKey,
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                Image.asset('assets/images/aqark.png', height: 80),
+                Image.asset(
+                  'assets/images/Aqark.png',
+                  height: 80,
+                  color: colors.textPrimary,
+                ),
                 const SizedBox(height: 40),
                 Text(
                   "Reset Password",
@@ -75,7 +79,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                   prefixIcon: Icons.lock_outline,
                   validator: (v) => (v == null || v.length < 6) ? "Too short" : null,
                 ),
-                const SizedBox(height: AppSpacing.spacing4),
+                SizedBox(height: AppSpacing.spacing4),
                 CustomAuthTextField(
                   controller: _confirmController,
                   label: "Confirm Password",

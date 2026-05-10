@@ -22,6 +22,7 @@ dependencies:
   get_it: ^9.2.1
   url_launcher: ^6.3.1
   image_picker: ^1.1.2
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:
@@ -32,13 +33,19 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/aqark.png"
+  image_path: "assets/images/Aqark.png"
   # Add these two lines for modern Android Adaptive Icons:
   adaptive_icon_background: "#FFFFFF" # Set this to your desired background color (White)
-  adaptive_icon_foreground: "assets/images/aqark.png" # Use the cropped image
+  adaptive_icon_foreground: "assets/images/Aqark.png" # Use the cropped image
   min_sdk_android: 21
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/properties/apartment/
+    - assets/images/properties/duplex/
+    - assets/images/properties/villa/
+    - assets/images/properties/townhouse/
+    - assets/images/properties/studio/
+    - assets/images/properties/penthouse/

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../routes/app_routes.dart';
 import '../models/models.dart';
 
@@ -19,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Villa',
     'Townhouse',
     'Studio',
+    'Penthouse',
   ];
   String _activeCategory = 'All';
 
@@ -27,11 +29,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return _properties.where((p) => p.type == _activeCategory).toList();
   }
 
+  int _getCategoryCount(String category) {
+    if (category == 'All') return _properties.length;
+    return _properties.where((p) => p.type == category).length;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final colors = isDark ? AppSemanticColors.dark : AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -225,6 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               final category = _categories[index];
               final isActive = category == _activeCategory;
+              final count = _getCategoryCount(category);
               return GestureDetector(
                 onTap: () {
                   setState(() {
@@ -247,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      category,
+                      '$category ($count)',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: isActive ? Colors.white : colors.textSecondary,
@@ -273,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
       baths: 4,
       size: 350,
       description: 'A stunning villa with a private pool, open terraces, and sea breeze living.',
-      imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80',
+      imageUrl: 'assets/images/properties/villa/villa_1.jpg',
       address: 'Glim, Alexandria',
       type: 'Villa',
     ),
@@ -286,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
       baths: 1,
       size: 80,
       description: 'Bright studio with beach access and modern finishes for easy coastal living.',
-      imageUrl: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80',
+      imageUrl: 'assets/images/properties/studio/studio_1.jpg',
       address: 'Cleopatra, Alexandria',
       type: 'Studio',
     ),
@@ -299,7 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
       baths: 2,
       size: 240,
       description: 'Spacious family residence with leafy views and elegant living spaces.',
-      imageUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=900&q=80',
+      imageUrl: 'assets/images/properties/apartment/apartment_1.jpg',
       address: 'Maadi, Cairo',
       type: 'Apartment',
     ),
@@ -312,9 +320,171 @@ class _HomeScreenState extends State<HomeScreen> {
       baths: 4,
       size: 400,
       description: 'Extravagant duplex with private garden and high-end finishes.',
-      imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80',
+      imageUrl: 'assets/images/properties/duplex/duplex_1.jpg',
       address: 'Sheikh Zayed, Cairo',
       type: 'Duplex',
+    ),
+    // APARTMENT
+    PropertyDisplay(
+      id: 'apt_1',
+      title: 'Luxury Downtown Apartment',
+      location: 'City Center',
+      price: 350000,
+      beds: 2,
+      baths: 2,
+      size: 120,
+      description: 'High-end apartment in the heart of downtown with premium finishes.',
+      imageUrl: 'assets/images/properties/apartment/apartment_1.jpg',
+      address: 'Downtown Street, City Center',
+      type: 'Apartment',
+    ),
+    PropertyDisplay(
+      id: 'apt_2',
+      title: 'Cozy Studio Apartment',
+      location: 'City Center',
+      price: 180000,
+      beds: 1,
+      baths: 1,
+      size: 65,
+      description: 'Compact and efficient living space, perfect for students or singles.',
+      imageUrl: 'assets/images/properties/apartment/apartment_2.jpg',
+      address: 'University Ave, City Center',
+      type: 'Apartment',
+    ),
+    // DUPLEX
+    PropertyDisplay(
+      id: 'duplex_1',
+      title: 'Modern Duplex Loft',
+      location: 'Arts District',
+      price: 550000,
+      beds: 3,
+      baths: 2,
+      size: 180,
+      description: 'Industrial style duplex with double-height ceilings and large windows.',
+      imageUrl: 'assets/images/properties/duplex/duplex_1.jpg',
+      address: 'Arts District, East Side',
+      type: 'Duplex',
+    ),
+    PropertyDisplay(
+      id: 'duplex_2',
+      title: 'Family Duplex Home',
+      location: 'Suburb Area',
+      price: 620000,
+      beds: 4,
+      baths: 3,
+      size: 220,
+      description: 'Spacious two-story home with a private garden and modern amenities.',
+      imageUrl: 'assets/images/properties/duplex/duplex_2.jpg',
+      address: 'Green Valley, Suburb Area',
+      type: 'Duplex',
+    ),
+    // VILLA
+    PropertyDisplay(
+      id: 'villa_1',
+      title: 'Beachfront Luxury Villa',
+      location: 'Coastline',
+      price: 1200000,
+      beds: 5,
+      baths: 4,
+      size: 350,
+      description: 'Stunning villa with direct beach access and panoramic ocean views.',
+      imageUrl: 'assets/images/properties/villa/villa_1.jpg',
+      address: 'Ocean Drive, Coastline',
+      type: 'Villa',
+    ),
+    PropertyDisplay(
+      id: 'villa_2',
+      title: 'Mountain View Villa',
+      location: 'Hillside',
+      price: 890000,
+      beds: 4,
+      baths: 4,
+      size: 280,
+      description: 'Quiet retreat surrounded by nature with spectacular mountain views.',
+      imageUrl: 'assets/images/properties/villa/villa_2.jpg',
+      address: 'Pine Ridge, Hillside',
+      type: 'Villa',
+    ),
+    // TOWNHOUSE
+    PropertyDisplay(
+      id: 'town_1',
+      title: 'Modern Townhouse',
+      location: 'City Center',
+      price: 420000,
+      beds: 3,
+      baths: 2,
+      size: 150,
+      description: 'Contemporary townhouse with a rooftop terrace in a prime location.',
+      imageUrl: 'assets/images/properties/townhouse/townhouse_1.jpg',
+      address: 'Maple Street, City Center',
+      type: 'Townhouse',
+    ),
+    PropertyDisplay(
+      id: 'town_2',
+      title: 'Corner Unit Townhouse',
+      location: 'Residential Zone',
+      price: 510000,
+      beds: 4,
+      baths: 3,
+      size: 195,
+      description: 'Extra-wide townhouse unit with lots of natural light and side yard.',
+      imageUrl: 'assets/images/properties/townhouse/townhouse_2.jpg',
+      address: 'Oak Lane, Residential Zone',
+      type: 'Townhouse',
+    ),
+    // STUDIO
+    PropertyDisplay(
+      id: 'studio_1',
+      title: 'Minimalist Studio',
+      location: 'Downtown',
+      price: 120000,
+      beds: 0,
+      baths: 1,
+      size: 45,
+      description: 'Clean and modern studio apartment, optimized for urban living.',
+      imageUrl: 'assets/images/properties/studio/studio_1.jpg',
+      address: 'Central Park West, Downtown',
+      type: 'Studio',
+    ),
+    PropertyDisplay(
+      id: 'studio_2',
+      title: 'Art District Studio',
+      location: 'Creative Zone',
+      price: 135000,
+      beds: 0,
+      baths: 1,
+      size: 50,
+      description: 'Vibrant studio located in the heart of the arts and culture district.',
+      imageUrl: 'assets/images/properties/studio/studio_2.jpg',
+      address: 'Gallery Row, Creative Zone',
+      type: 'Studio',
+    ),
+    // PENTHOUSE
+    PropertyDisplay(
+      id: 'pent_1',
+      title: 'Skyline Penthouse',
+      location: 'City Center',
+      price: 950000,
+      beds: 3,
+      baths: 3,
+      size: 250,
+      description: 'Top-floor penthouse with a private terrace and city-wide views.',
+      imageUrl: 'assets/images/properties/penthouse/penthouse_1.jpg',
+      address: 'Sky Tower, City Center',
+      type: 'Penthouse',
+    ),
+    PropertyDisplay(
+      id: 'pent_2',
+      title: 'Luxury Penthouse Suite',
+      location: 'Waterfront',
+      price: 1400000,
+      beds: 4,
+      baths: 3,
+      size: 310,
+      description: 'The ultimate in luxury, featuring ultra-premium amenities and water views.',
+      imageUrl: 'assets/images/properties/penthouse/penthouse_2.jpg',
+      address: 'Marina Bay, Waterfront',
+      type: 'Penthouse',
     ),
   ];
 
@@ -381,7 +551,7 @@ class PropertyCardPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final colors = isDark ? AppSemanticColors.dark : AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return InkWell(
       onTap: () => Navigator.pushNamed(context, AppRoutes.propertyDetails, arguments: property.toProperty()),
@@ -393,7 +563,7 @@ class PropertyCardPreview extends StatelessWidget {
           border: Border.all(color: colors.borderSubtle),
           boxShadow: isDark ? null : [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 24,
               offset: const Offset(0, 12),
             ),
@@ -409,7 +579,7 @@ class PropertyCardPreview extends StatelessWidget {
                   child: SizedBox(
                     height: 180,
                     width: double.infinity,
-                    child: Image.network(property.imageUrl, fit: BoxFit.cover),
+                    child: Image.asset(property.imageUrl, fit: BoxFit.cover),
                   ),
                 ),
                 Positioned(
@@ -418,7 +588,7 @@ class PropertyCardPreview extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.6),
+                      color: Colors.black.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(AppRadius.radius8),
                     ),
                     child: Text(
@@ -492,7 +662,7 @@ class BrokerCardPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final colors = isDark ? AppSemanticColors.dark : AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return Container(
       decoration: BoxDecoration(

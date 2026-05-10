@@ -97,21 +97,14 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                     borderRadius: BorderRadius.circular(AppRadius.radius24),
                     child: Stack(
                       children: [
-                        Image.network(
-                          widget.property.imageUrl.isNotEmpty
-                              ? widget.property.imageUrl
-                              : 'https://via.placeholder.com/600x400',
-                          height: 300,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
+                        _buildPropertyImage(widget.property.imageUrl),
                         Positioned(
                           bottom: 16,
                           right: 16,
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
+                              color: Colors.black.withOpacity(0.6),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Text(
@@ -139,19 +132,16 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                           borderRadius: BorderRadius.circular(AppRadius.radius8),
                           child: Stack(
                             children: [
-                              Image.network(
-                                widget.property.imageUrl.isNotEmpty
-                                    ? widget.property.imageUrl
-                                    : 'https://via.placeholder.com/150',
+                              SizedBox(
                                 width: 70,
                                 height: 70,
-                                fit: BoxFit.cover,
+                                child: _buildPropertyImage(widget.property.imageUrl),
                               ),
                               if (index == 3)
                                 Container(
                                   width: 70,
                                   height: 70,
-                                  color: Colors.black.withValues(alpha: 0.4),
+                                  color: Colors.black.withOpacity(0.4),
                                   alignment: Alignment.center,
                                   child: const Text(
                                     "+4",
@@ -185,7 +175,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: colors.actionPrimaryDefault.withValues(alpha: 0.1),
+                          color: colors.actionPrimaryDefault.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -267,6 +257,36 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     );
   }
 
+  Widget _buildPropertyImage(String imageUrl) {
+    if (imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        height: 300,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Image.network(
+          'https://via.placeholder.com/600x400',
+          height: 300,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else {
+      return Image.network(
+        imageUrl.isNotEmpty ? imageUrl : 'https://via.placeholder.com/600x400',
+        height: 300,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Image.network(
+          'https://via.placeholder.com/600x400',
+          height: 300,
+          width: double.infinity,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+  }
+
   Widget _buildActionBottomBar(AppSemanticColors colors) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.spacing4),
@@ -274,7 +294,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
         color: colors.surfaceCard,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -285,7 +305,11 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           children: [
             Expanded(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                   ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Visit booking feature coming soon!")),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.actionPrimaryDefault,
                   foregroundColor: Colors.white,
@@ -494,7 +518,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.6),
+                      color: Colors.black.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Row(
@@ -522,7 +546,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colors.actionPrimaryDefault.withValues(alpha: 0.05),
+              color: colors.actionPrimaryDefault.withOpacity(0.05),
               borderRadius: BorderRadius.circular(AppRadius.radius8),
             ),
             child: Row(
@@ -547,9 +571,9 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.5),
+        color: Colors.black.withOpacity(0.5),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+        border: Border.all(color: Colors.white.withOpacity(0.5)),
       ),
       child: Row(
         children: [
@@ -669,7 +693,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
               ),
               CircleAvatar(
                 radius: 18,
-                backgroundColor: colors.actionPrimaryDefault.withValues(alpha: 0.1),
+                backgroundColor: colors.actionPrimaryDefault.withOpacity(0.1),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -696,26 +720,6 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBottomNav(AppSemanticColors colors) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: 0,
-      selectedItemColor: colors.actionPrimaryDefault,
-      unselectedItemColor: colors.textDisabled,
-      showUnselectedLabels: true,
-      onTap: (index) {
-        // Link to main hub screens
-        Navigator.pushNamedAndRemoveUntil(context, AppRoutes.mainHub, (route) => false);
-      },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-        BottomNavigationBarItem(icon: Icon(Icons.compare_arrows), label: "Compare"),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
-      ],
     );
   }
 }

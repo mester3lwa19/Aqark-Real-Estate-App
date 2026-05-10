@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../routes/app_routes.dart';
@@ -10,20 +10,24 @@ class SuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing6),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.spacing6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              Image.asset('assets/images/aqark.png', height: 100),
+              Image.asset(
+                'assets/images/Aqark.png',
+                height: 100,
+                color: colors.textPrimary,
+              ),
               const SizedBox(height: 60),
               Container(
-                padding: const EdgeInsets.all(AppSpacing.spacing4),
+                padding: EdgeInsets.all(AppSpacing.spacing4),
                 decoration: BoxDecoration(
                   color: colors.actionPrimaryDefault.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
@@ -57,7 +61,7 @@ class SuccessScreen extends StatelessWidget {
                   Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (route) => false);
                 },
               ),
-              const SizedBox(height: AppSpacing.spacing8),
+              SizedBox(height: AppSpacing.spacing8),
             ],
           ),
         ),

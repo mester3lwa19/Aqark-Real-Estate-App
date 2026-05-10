@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../routes/app_routes.dart';
@@ -27,14 +27,20 @@ class _SignOtpScreenState extends State<SignOtpScreen> {
         // If mailto doesn't work (e.g. emulator), just show a message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Could not open email app. Please open it manually.")),
+            SnackBar(
+              content: const Text("Could not open email app. Please open it manually."),
+              backgroundColor: AppTheme.getColors(context).statusError,
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please check your Gmail inbox.")),
+          SnackBar(
+            content: const Text("Please check your Gmail inbox."),
+            backgroundColor: AppTheme.getColors(context).statusInfo,
+          ),
         );
       }
     }
@@ -46,7 +52,7 @@ class _SignOtpScreenState extends State<SignOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
@@ -54,17 +60,21 @@ class _SignOtpScreenState extends State<SignOtpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spacing6),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.spacing6),
           child: Column(
             children: [
               const SizedBox(height: 20),
-              Image.asset('assets/images/aqark.png', height: 80),
+              Image.asset(
+                'assets/images/Aqark.png',
+                height: 80,
+                color: colors.textPrimary,
+              ),
               const SizedBox(height: 40),
               Icon(Icons.mark_email_unread_outlined, size: 100, color: colors.actionPrimaryDefault),
               const SizedBox(height: 30),
@@ -76,7 +86,7 @@ class _SignOtpScreenState extends State<SignOtpScreen> {
                   lineHeight: AppTypography.lineHeight7,
                 ).copyWith(color: colors.textPrimary),
               ),
-              const SizedBox(height: AppSpacing.spacing2),
+              SizedBox(height: AppSpacing.spacing2),
               Text(
                 "We've sent a verification link to your email. Please click the link to activate your account.",
                 textAlign: TextAlign.center,

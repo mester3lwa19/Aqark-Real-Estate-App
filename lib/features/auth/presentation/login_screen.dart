@@ -4,6 +4,7 @@ import '../data/data.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../routes/app_routes.dart';
 import 'widgets/auth_widgets.dart';
 
@@ -53,9 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
             
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Please verify your email before logging in."),
-                  backgroundColor: Colors.orange,
+                SnackBar(
+                  content: const Text("Please verify your email before logging in."),
+                  backgroundColor: AppTheme.getColors(context).statusWarning,
                 ),
               );
               Navigator.pushNamed(context, AppRoutes.otpVerification);
@@ -76,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(e.toString()),
-              backgroundColor: Colors.redAccent,
+              backgroundColor: AppTheme.getColors(context).statusError,
             ),
           );
         }
@@ -88,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
@@ -101,7 +102,11 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 60),
-                Image.asset('assets/images/aqark.png', height: 80),
+                Image.asset(
+                  'assets/images/Aqark.png',
+                  height: 80,
+                  color: colors.textPrimary,
+                ),
                 const SizedBox(height: 40),
                 Text(
                   "Welcome Back",
@@ -175,7 +180,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don't have an account? "),
+                    Text(
+                      "Don't have an account? ",
+                      style: TextStyle(color: colors.textSecondary),
+                    ),
                     GestureDetector(
                       onTap: () => Navigator.pushReplacementNamed(
                         context,

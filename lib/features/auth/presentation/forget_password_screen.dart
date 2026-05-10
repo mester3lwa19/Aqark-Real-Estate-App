@@ -4,6 +4,7 @@ import '../data/data.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../routes/app_routes.dart';
 import 'widgets/auth_widgets.dart';
 
@@ -38,7 +39,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.redAccent),
+            SnackBar(
+              content: Text(e.toString()),
+              backgroundColor: AppTheme.getColors(context).statusError,
+            ),
           );
         }
       } finally {
@@ -49,14 +53,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -68,7 +72,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                Image.asset('assets/images/aqark.png', height: 80),
+                Image.asset(
+                  'assets/images/Aqark.png',
+                  height: 80,
+                  color: colors.textPrimary,
+                ),
                 const SizedBox(height: 40),
                 Text(
                   "Enter your email so we can send\nyou reset password message",

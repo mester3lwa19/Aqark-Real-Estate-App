@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class CustomAuthTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -29,7 +31,7 @@ class CustomAuthTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +107,7 @@ class PrimaryAuthButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return SizedBox(
       width: double.infinity,
@@ -140,27 +142,83 @@ class SocialLoginRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.getColors(context);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _SocialButton(iconPath: 'assets/images/google.png', onTap: () {}),
+        _SocialButton(
+          iconPath: 'assets/images/google.png',
+          onTap: () {},
+          colors: colors,
+          isDark: isDark,
+        ),
         const SizedBox(width: AppSpacing.spacing6),
-        _SocialButton(iconPath: 'assets/images/apple.png', onTap: () {}),
+        _SocialButton(
+          iconData: FontAwesomeIcons.apple,
+          onTap: () {},
+          colors: colors,
+          isDark: isDark,
+        ),
         const SizedBox(width: AppSpacing.spacing6),
-        _SocialButton(iconPath: 'assets/images/facebook.png', onTap: () {}),
+        _SocialButton(
+          iconData: FontAwesomeIcons.facebook,
+          onTap: () {},
+          colors: colors,
+          isDark: isDark,
+        ),
       ],
     );
   }
 }
 
 class _SocialButton extends StatelessWidget {
-  final String iconPath;
+  final IconData? iconData;
+  final String? iconPath;
   final VoidCallback onTap;
+  final AppSemanticColors colors;
+  final bool isDark;
 
-  const _SocialButton({required this.iconPath, required this.onTap});
+  const _SocialButton({
+    this.iconData,
+    this.iconPath,
+    required this.onTap,
+    required this.colors,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
+    Color? iconColor;
+    Color bgColor;
+    BoxBorder? border;
+
+    bool isGoogle = iconPath?.contains('google') ?? false;
+    bool isFacebook = iconData == FontAwesomeIcons.facebook || (iconPath?.contains('facebook') ?? false);
+    bool isApple = iconData == FontAwesomeIcons.apple || (iconPath?.contains('apple') ?? false);
+
+    if (isGoogle) {
+      // Google: Multi-colored logo on white background
+      iconColor = null;
+      bgColor = Colors.white;
+      border = Border.all(color: const Color(0xFFEEEEEE));
+    } else if (isFacebook) {
+      // Facebook: Official blue icon on white background
+      iconColor = const Color(0xFF1877F2);
+      bgColor = Colors.white;
+      border = Border.all(color: const Color(0xFFEEEEEE));
+    } else if (isApple) {
+      // Apple: Black on white in dark mode, White on black in light mode
+      iconColor = isDark ? Colors.black : Colors.white;
+      bgColor = isDark ? Colors.white : Colors.black;
+      border = null;
+    } else {
+      iconColor = isDark ? colors.textPrimary : null;
+      bgColor = colors.surfaceCard;
+      border = Border.all(color: colors.borderSubtle);
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -168,11 +226,23 @@ class _SocialButton extends StatelessWidget {
         height: 48,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: AppSemanticColors.light.borderSubtle),
-          color: Colors.white,
+          border: border,
+          color: bgColor,
         ),
-        padding: const EdgeInsets.all(AppSpacing.spacing3),
-        child: Image.asset(iconPath, fit: BoxFit.contain),
+        padding: const EdgeInsets.all(AppSpacing.spacing2),
+        child: iconData != null
+            ? Center(
+                child: FaIcon(
+                  iconData,
+                  color: iconColor,
+                  size: 24,
+                ),
+              )
+            : Image.asset(
+                iconPath!,
+                fit: BoxFit.contain,
+                color: iconColor,
+              ),
       ),
     );
   }

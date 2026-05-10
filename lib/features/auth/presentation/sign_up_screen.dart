@@ -4,6 +4,7 @@ import '../data/data.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../routes/app_routes.dart';
 import 'widgets/auth_widgets.dart';
 
@@ -57,7 +58,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(e.toString()),
-              backgroundColor: Colors.redAccent,
+              backgroundColor: AppTheme.getColors(context).statusError,
             ),
           );
         }
@@ -69,7 +70,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return Scaffold(
       backgroundColor: colors.surfaceBackground,
@@ -81,7 +82,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 40),
-                Image.asset('assets/images/aqark.png', height: 80),
+                Image.asset(
+                  'assets/images/Aqark.png',
+                  height: 80,
+                  color: colors.textPrimary,
+                ),
                 const SizedBox(height: 30),
                 Text(
                   "Create an Account",
@@ -156,7 +161,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Already have an account? "),
+                    Text(
+                      "Already have an account? ",
+                      style: TextStyle(color: colors.textSecondary),
+                    ),
                     GestureDetector(
                       onTap: () => Navigator.pushReplacementNamed(
                         context,

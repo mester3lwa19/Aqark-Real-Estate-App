@@ -8,6 +8,7 @@ import '../routes/app_routes.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_dimensions.dart';
 import '../core/theme/app_typography.dart';
+import '../core/theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -101,12 +102,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final colors = isDark ? AppSemanticColors.dark : AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -115,11 +116,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final String? photoUrl = _userData?['photo_url'];
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Profile"),
+        title: Text("Profile", style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
+        centerTitle: true,
       ),
       body: ListenableBuilder(
         listenable: _settingsController,
@@ -138,7 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ? (photoUrl.startsWith('http') 
                             ? NetworkImage(photoUrl) as ImageProvider
                             : FileImage(File(photoUrl)))
-                        : const AssetImage('assets/images/aqark.png'),
+                        : const AssetImage('assets/images/Aqark.png'),
                     ),
                     Positioned(
                       bottom: 0,
@@ -190,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 Text(
                   email,
-                  style: TextStyle(color: colors.textDisabled, fontSize: 16),
+                  style: TextStyle(color: colors.textSecondary, fontSize: 16),
                 ),
                 const SizedBox(height: 48),
                 
@@ -208,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           _settingsController.themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
                           color: colors.actionPrimaryDefault,
                         ),
-                        title: const Text("Dark Mode", style: TextStyle(fontWeight: FontWeight.w600)),
+                        title: Text("Dark Mode", style: TextStyle(fontWeight: FontWeight.w600, color: colors.textPrimary)),
                         value: _settingsController.themeMode == ThemeMode.dark,
                         onChanged: (value) => _settingsController.updateThemeMode(value),
                         activeColor: colors.actionPrimaryDefault,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../features/auth/presentation/login_screen.dart';
+import '../features/auth/presentation/auth_wrapper.dart';
 import 'app_routes.dart';
 // Feature Imports
 import '../features/auth/presentation/sign_up_screen.dart';
@@ -26,6 +27,8 @@ class RouterGenerator {
       // ----------------------------------------
       case AppRoutes.onboarding:
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
+      case AppRoutes.authWrapper:
+        return MaterialPageRoute(builder: (_) => const AuthWrapper());
       case AppRoutes.login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case AppRoutes.signup:

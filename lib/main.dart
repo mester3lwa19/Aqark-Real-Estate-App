@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'core/di/service_locator.dart';
 import 'core/network/sync_service.dart';
@@ -32,26 +31,19 @@ void main() async {
   final prefs = GetIt.instance<SharedPreferences>();
   final bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
 
-  // Check Auth state
-  final auth = GetIt.instance<FirebaseAuth>();
-  final bool isLoggedIn = auth.currentUser != null;
-
   runApp(AqarkApp(
     isFirstTime: isFirstTime,
-    isLoggedIn: isLoggedIn,
     settingsController: settingsController,
   ));
 }
 
 class AqarkApp extends StatelessWidget {
   final bool isFirstTime;
-  final bool isLoggedIn;
   final SettingsController settingsController;
 
   const AqarkApp({
     super.key,
     required this.isFirstTime,
-    required this.isLoggedIn,
     required this.settingsController,
   });
 
@@ -71,7 +63,7 @@ class AqarkApp extends StatelessWidget {
           // --- SMART NAVIGATION ---
           initialRoute: isFirstTime
               ? AppRoutes.onboarding
-              : (isLoggedIn ? AppRoutes.mainHub : AppRoutes.signup),
+              : AppRoutes.authWrapper,
 
           onGenerateRoute: RouterGenerator.generateRoute,
         );

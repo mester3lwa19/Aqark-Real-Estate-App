@@ -1,100 +1,218 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../auth/data/data.dart';
 import '../../../core/database/database_helper.dart';
 import '../../../core/network/network_info.dart';
 import '../models/models.dart';
 
 class PropertyRepository {
-  final FirebaseAuth _auth;
+  final AuthRepository _authRepository;
   final FirebaseDatabase _database;
   final DatabaseHelper _dbHelper;
   final NetworkInfo _networkInfo;
 
   PropertyRepository({
-    required FirebaseAuth auth,
+    required AuthRepository authRepository,
     required FirebaseDatabase database,
     required DatabaseHelper dbHelper,
     required NetworkInfo networkInfo,
-  })  : _auth = auth,
+  })  : _authRepository = authRepository,
         _database = database,
         _dbHelper = dbHelper,
         _networkInfo = networkInfo;
 
   DatabaseReference get _favoritesRef {
-    final uid = _auth.currentUser?.uid;
+    final uid = _authRepository.currentUserId;
     if (uid == null) throw Exception("User not logged in");
     return _database.ref("users/$uid/favorites");
   }
 
+  DatabaseReference get _propertiesRef => _database.ref("properties");
+
   Future<void> toggleFavorite(Property property) async {
-    final uid = _auth.currentUser?.uid;
+    final uid = _authRepository.currentUserId;
     if (uid == null) return;
 
-    final favorites = await _dbHelper.getFavorites(uid);
-    final isFavorite = favorites.any((element) => element['id'] == property.id);
+    final isFav = await _dbHelper.isFavorite(property.id, uid);
 
-    if (isFavorite) {
-      await _dbHelper.removeFavorite(property.id, uid );
+    if (isFav) {
+      // 1. Update local state to 'pending_remove' for instant UI feedback
+      final propertyMap = property.toMap();
+      propertyMap['userid'] = uid;
+      propertyMap['syncStatus'] = 'pending_remove';
+      await _dbHelper.saveFavorite(propertyMap);
+
       if (await _networkInfo.isConnected) {
-        await _favoritesRef.child(property.id).remove();
+        try {
+          await _favoritesRef.child(property.id).remove();
+          await _dbHelper.removeFavorite(property.id, uid);
+        } catch (e) {
+          debugPrint("Error removing favorite from cloud: $e");
+          // Action is already in local DB as 'pending_remove'
+        }
+      } else {
+        // Queue for background sync
+        await _dbHelper.addToSyncQueue('toggle_favorite', {
+          'id': property.id,
+          'action': 'remove',
+          'userid': uid,
+        });
       }
     } else {
+      // 1. Update local state to 'pending_add'
       final propertyMap = property.toMap();
-      propertyMap['userid'] = uid; // Match database column name
+      propertyMap['userid'] = uid;
+      propertyMap['syncStatus'] = 'pending_add';
       await _dbHelper.saveFavorite(propertyMap);
+
       if (await _networkInfo.isConnected) {
-        await _favoritesRef.child(property.id).set(propertyMap);
+        try {
+          await _favoritesRef.child(property.id).set(propertyMap);
+          propertyMap['syncStatus'] = 'synced';
+          await _dbHelper.saveFavorite(propertyMap);
+        } catch (e) {
+          debugPrint("Error adding favorite to cloud: $e");
+          // Action is already in local DB as 'pending_add'
+        }
+      } else {
+        // Queue for background sync
+        await _dbHelper.addToSyncQueue('toggle_favorite', {
+          'id': property.id,
+          'action': 'add',
+          'property': propertyMap,
+          'userid': uid,
+        });
       }
+    }
+  }
+
+  Future<void> syncFavoriteAction(Map<String, dynamic> payload) async {
+    final String action = payload['action'];
+    final String id = payload['id'];
+    final String uid = payload['userid'];
+    
+    final ref = _database.ref("users/$uid/favorites");
+    if (action == 'add') {
+      final propertyMap = Map<String, dynamic>.from(payload['property']);
+      await ref.child(id).set(propertyMap);
+      
+      propertyMap['syncStatus'] = 'synced';
+      propertyMap['userid'] = uid;
+      await _dbHelper.saveFavorite(propertyMap);
+    } else {
+      await ref.child(id).remove();
+      await _dbHelper.removeFavorite(id, uid);
     }
   }
 
   Future<List<Property>> getFavorites() async {
-    final uid = _auth.currentUser?.uid;
+    final uid = _authRepository.currentUserId;
     if (uid == null) return [];
 
-    if (await _networkInfo.isConnected) {
-      try {
-        final snapshot = await _favoritesRef.get();
-        if (snapshot.exists) {
-          final List<Property> remoteFavorites = [];
-          final data = snapshot.value as Map<dynamic, dynamic>;
-          data.forEach((key, value) {
-            remoteFavorites.add(Property.fromMap(Map<String, dynamic>.from(value)));
-          });
-          
-          // Update local database with remote favorites
-          for (var property in remoteFavorites) {
-            final map = property.toMap();
-            map['userid'] = uid; // Match database column name
-            await _dbHelper.saveFavorite(map);
-          }
-          return remoteFavorites;
-        }
-      } catch (e) {
-        print("Error fetching remote favorites: $e");
-      }
-    }
-
-    // Fallback to local
+    // Instant local load - includes pending_add, excludes pending_remove
     final localData = await _dbHelper.getFavorites(uid);
-    return localData.map((e) => Property.fromMap(e)).toList();
+    final localFavorites = localData
+        .where((e) => e['syncStatus'] != 'pending_remove')
+        .map((e) => Property.fromMap(e))
+        .toList();
+
+    return localFavorites;
+  }
+
+  Future<void> _refreshFavorites(String uid) async {
+    try {
+      if (!(await _networkInfo.isConnected)) return;
+
+      // 1. Push any local pending changes first to avoid overwriting them
+      final pendingFavorites = await _dbHelper.getPendingSyncFavorites(uid);
+      for (var fav in pendingFavorites) {
+        if (fav['syncStatus'] == 'pending_add') {
+          await _favoritesRef.child(fav['id']).set(fav);
+          await _dbHelper.saveFavorite({...fav, 'syncStatus': 'synced'});
+        } else if (fav['syncStatus'] == 'pending_remove') {
+          await _favoritesRef.child(fav['id']).remove();
+          await _dbHelper.removeFavorite(fav['id'], uid);
+        }
+      }
+
+      // 2. Pull remote favorites
+      final snapshot = await _favoritesRef.get();
+      if (snapshot.exists) {
+        final data = snapshot.value as Map<dynamic, dynamic>;
+        final List<Map<String, dynamic>> remoteList = [];
+        final List<String> remoteIds = [];
+        
+        data.forEach((key, value) {
+          final map = Map<String, dynamic>.from(value);
+          remoteList.add(map);
+          remoteIds.add(map['id']);
+        });
+
+        // 3. Update local DB - sync remote to local
+        await _dbHelper.syncFavoritesToLocal(remoteList, uid);
+        
+        // 4. Remove local 'synced' favorites that are no longer in remote
+        await _dbHelper.clearSyncedFavorites(uid, remoteIds);
+      } else {
+        // Remote is empty, clear local synced favorites
+        await _dbHelper.clearSyncedFavorites(uid, []);
+      }
+    } catch (e) {
+      debugPrint("Error refreshing favorites: $e");
+    }
   }
 
   Future<void> syncFavorites() async {
-    final uid = _auth.currentUser?.uid;
+    final uid = _authRepository.currentUserId;
     if (uid == null || !(await _networkInfo.isConnected)) return;
-
-    final localFavorites = await _dbHelper.getFavorites(uid);
-    
-    for (var favorite in localFavorites) {
-      await _favoritesRef.child(favorite['id']).set(favorite);
-    }
-    
-    await getFavorites();
+    await _refreshFavorites(uid);
   }
 
   Future<List<Property>> getProperties({String? query}) async {
-    final mockProperties = [
+    // 1. Load from local DB immediately
+    final localData = await _dbHelper.getProperties();
+    List<Property> properties = localData.map((e) => Property.fromMap(e)).toList();
+
+    // If local DB is empty, use mock data as initial seed
+    if (properties.isEmpty) {
+      properties = _getMockProperties();
+      await _dbHelper.saveProperties(properties.map((e) => e.toMap()).toList());
+    }
+
+    // 2. If online, refresh from Firebase in background
+    if (await _networkInfo.isConnected) {
+      refreshProperties();
+    }
+
+    if (query != null && query.isNotEmpty) {
+      return properties
+          .where((p) => p.title.toLowerCase().contains(query.toLowerCase()) ||
+                        p.address.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+    return properties;
+  }
+
+  Future<void> refreshProperties() async {
+    try {
+      if (!(await _networkInfo.isConnected)) return;
+      
+      final snapshot = await _propertiesRef.get();
+      if (snapshot.exists) {
+        final data = snapshot.value as Map<dynamic, dynamic>;
+        final List<Map<String, dynamic>> properties = [];
+        data.forEach((key, value) {
+          properties.add(Map<String, dynamic>.from(value));
+        });
+        await _dbHelper.saveProperties(properties);
+      }
+    } catch (e) {
+      debugPrint("Error refreshing properties: $e");
+    }
+  }
+
+  List<Property> _getMockProperties() {
+    return [
       Property(
         id: '1',
         title: 'Modern Villa in New Cairo',
@@ -137,7 +255,6 @@ class PropertyRepository {
         sqm: 65,
         type: 'Studio',
       ),
-      // APARTMENT
       Property(
         id: 'apt_1',
         title: 'Luxury Downtown Apartment',
@@ -166,7 +283,6 @@ class PropertyRepository {
         sqm: 65,
         type: 'Apartment',
       ),
-      // DUPLEX
       Property(
         id: 'duplex_1',
         title: 'Modern Duplex Loft',
@@ -195,7 +311,6 @@ class PropertyRepository {
         sqm: 220,
         type: 'Duplex',
       ),
-      // VILLA
       Property(
         id: 'villa_1',
         title: 'Beachfront Luxury Villa',
@@ -224,7 +339,6 @@ class PropertyRepository {
         sqm: 280,
         type: 'Villa',
       ),
-      // TOWNHOUSE
       Property(
         id: 'town_1',
         title: 'Modern Townhouse',
@@ -253,7 +367,6 @@ class PropertyRepository {
         sqm: 195,
         type: 'Townhouse',
       ),
-      // STUDIO
       Property(
         id: 'studio_1',
         title: 'Minimalist Studio',
@@ -282,7 +395,6 @@ class PropertyRepository {
         sqm: 50,
         type: 'Studio',
       ),
-      // PENTHOUSE
       Property(
         id: 'pent_1',
         title: 'Skyline Penthouse',
@@ -312,13 +424,5 @@ class PropertyRepository {
         type: 'Penthouse',
       ),
     ];
-
-    if (query != null && query.isNotEmpty) {
-      return mockProperties
-          .where((p) => p.title.toLowerCase().contains(query.toLowerCase()) ||
-                        p.address.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    }
-    return mockProperties;
   }
 }

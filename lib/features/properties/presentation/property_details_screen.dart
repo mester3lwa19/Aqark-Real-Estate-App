@@ -6,7 +6,6 @@ import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/property_image.dart';
-import '../../../routes/app_routes.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
   final Property property;

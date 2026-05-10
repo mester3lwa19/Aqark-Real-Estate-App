@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'auth/data/data.dart';
 import '../core/settings/settings_controller.dart';
 import '../routes/app_routes.dart';
-import '../core/theme/app_colors.dart';
 import '../core/theme/app_dimensions.dart';
 import '../core/theme/app_typography.dart';
 import '../core/theme/app_theme.dart';
@@ -214,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: Text("Dark Mode", style: TextStyle(fontWeight: FontWeight.w600, color: colors.textPrimary)),
                         value: _settingsController.themeMode == ThemeMode.dark,
                         onChanged: (value) => _settingsController.updateThemeMode(value),
-                        activeColor: colors.actionPrimaryDefault,
+                        activeThumbColor: colors.actionPrimaryDefault,
                       ),
                     ],
                   ),

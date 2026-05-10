@@ -29,7 +29,6 @@ void main() {
     // Build our app and trigger a frame.
     // We provide initial state for the app parameters.
     await tester.pumpWidget(AqarkApp(
-      isLoggedIn: false,
       isFirstTime: false,
       settingsController: mockSettingsController,
     ));

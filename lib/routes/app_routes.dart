@@ -1,6 +1,7 @@
 class AppRoutes {
   // --- Auth & Onboarding Flow ---
   static const String onboarding = '/onboarding';
+  static const String authWrapper = '/auth_wrapper';
   static const String login = '/login';
   static const String signup = '/signup';
   static const String otpVerification = '/otp_verification';

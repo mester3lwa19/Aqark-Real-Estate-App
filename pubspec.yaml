@@ -34,9 +34,8 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/images/Aqark.png"
-  # Add these two lines for modern Android Adaptive Icons:
-  adaptive_icon_background: "#FFFFFF" # Set this to your desired background color (White)
-  adaptive_icon_foreground: "assets/images/Aqark.png" # Use the cropped image
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/Aqark.png"
   min_sdk_android: 21
 
 flutter:

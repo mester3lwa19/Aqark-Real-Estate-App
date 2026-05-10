@@ -3,7 +3,6 @@ import 'package:get_it/get_it.dart';
 import '../../../../../core/theme/app_dimensions.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_effects.dart';
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_theme.dart';
 import '../../../core/widgets/property_image.dart';
 import '../models/models.dart';

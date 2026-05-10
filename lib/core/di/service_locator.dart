@@ -36,7 +36,7 @@ Future<void> setupServiceLocator() async {
         networkInfo: locator(),
       ));
   locator.registerLazySingleton(() => PropertyRepository(
-        auth: locator(),
+        authRepository: locator(),
         database: locator(),
         dbHelper: locator(),
         networkInfo: locator(),

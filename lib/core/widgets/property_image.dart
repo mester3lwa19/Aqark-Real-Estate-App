@@ -7,12 +7,12 @@ class PropertyImage extends StatelessWidget {
   final BoxFit fit;
 
   const PropertyImage({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.height,
     this.width,
     this.fit = BoxFit.cover,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

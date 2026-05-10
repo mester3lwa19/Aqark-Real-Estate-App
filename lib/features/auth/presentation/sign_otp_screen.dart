@@ -14,7 +14,6 @@ class SignOtpScreen extends StatefulWidget {
 }
 
 class _SignOtpScreenState extends State<SignOtpScreen> {
-  bool _isLoading = false;
 
   void _openEmailApp() async {
     final Uri emailLaunchUri = Uri(

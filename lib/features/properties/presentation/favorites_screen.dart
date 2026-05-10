@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../favorites.dart';
 import 'property_card.dart';
 
@@ -23,17 +24,24 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.getColors(context);
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Saved Properties"),
+        title: Text(
+          "Saved Properties",
+          style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         automaticallyImplyLeading: false,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
       ),
       body: ListenableBuilder(
         listenable: _favoritesController,
         builder: (context, _) {
           if (_favoritesController.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator(color: colors.actionPrimaryDefault));
           }
 
           final favorites = _favoritesController.favorites;
@@ -43,16 +51,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
+                  Icon(Icons.favorite_border, size: 64, color: colors.textDisabled),
                   const SizedBox(height: 16),
                   Text(
                     "No saved properties yet",
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                    style: TextStyle(color: colors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     "Properties you favorite will appear here",
-                    style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                    style: TextStyle(color: colors.textSecondary, fontSize: 14),
                   ),
                 ],
               ),

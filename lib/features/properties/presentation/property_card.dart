@@ -4,6 +4,8 @@ import '../../../../../core/theme/app_dimensions.dart';
 import '../../../../../core/theme/app_typography.dart';
 import '../../../../../core/theme/app_effects.dart';
 import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_theme.dart';
+import '../../../core/widgets/property_image.dart';
 import '../models/models.dart';
 import '../../favorites.dart';
 import '../../../routes/app_routes.dart';
@@ -24,8 +26,9 @@ class PropertyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final theme = Theme.of(context);
+    final colors = AppTheme.getColors(context);
+    final isLightMode = theme.brightness == Brightness.light;
     final favoritesController = GetIt.instance<FavoritesController>();
 
     return GestureDetector(
@@ -45,9 +48,10 @@ class PropertyCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(AppSpacing.spacing4),
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(AppRadius.radius16),
-          boxShadow: AppShadows.shadowDefault,
+          border: Border.all(color: colors.borderSubtle),
+          boxShadow: isLightMode ? AppShadows.shadowDefault : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,23 +59,21 @@ class PropertyCard extends StatelessWidget {
             // Image placeholder
             Stack(
               children: [
-                Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    image: (property != null && property!.imageUrl.isNotEmpty)
-                        ? DecorationImage(
-                            image: NetworkImage(property!.imageUrl),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.radius8),
+                  child: SizedBox(
+                    height: 150,
+                    width: double.infinity,
+                    child: (property != null && property!.imageUrl.isNotEmpty)
+                        ? PropertyImage(
+                            imageUrl: property!.imageUrl,
                             fit: BoxFit.cover,
                           )
-                        : null,
-                    color: colorScheme.secondary.withValues(
-                      alpha: AppOpacity.opacity10,
-                    ),
-                    borderRadius: BorderRadius.circular(AppRadius.radius8),
+                        : Container(
+                            color: colors.surfaceBackground,
+                            child: Icon(Icons.home, size: 50, color: colors.textDisabled),
+                          ),
                   ),
-                  child: (property == null || property!.imageUrl.isEmpty)
-                      ? const Center(child: Icon(Icons.home, size: 50, color: Colors.grey))
-                      : null,
                 ),
                 if (property != null)
                   Positioned(
@@ -86,12 +88,12 @@ class PropertyCard extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.8),
+                              color: Colors.black.withOpacity(0.4),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               isFavorite ? Icons.favorite : Icons.favorite_border,
-                              color: isFavorite ? Colors.red : Colors.grey,
+                              color: isFavorite ? Colors.red : Colors.white,
                               size: 20,
                             ),
                           ),
@@ -110,7 +112,7 @@ class PropertyCard extends StatelessWidget {
                 fontSize: AppTypography.fontSize6,
                 fontWeight: AppTypography.weightSemiBold,
                 lineHeight: AppTypography.lineHeight7,
-              ).copyWith(color: colorScheme.onSurface),
+              ).copyWith(color: colors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.spacing1),
 
@@ -124,7 +126,7 @@ class PropertyCard extends StatelessWidget {
                     fontSize: AppTypography.fontSize4,
                     fontWeight: AppTypography.weightBold,
                     lineHeight: AppTypography.lineHeight6,
-                  ).copyWith(color: colorScheme.primary),
+                  ).copyWith(color: colors.actionPrimaryDefault),
                 ),
                 if (isVerified)
                   Container(
@@ -133,11 +135,7 @@ class PropertyCard extends StatelessWidget {
                       vertical: AppSpacing.spacing1,
                     ),
                     decoration: BoxDecoration(
-                      color: isLightMode
-                          ? AppSemanticColors.light.propertyVerifiedBadge
-                                .withValues(alpha: AppOpacity.opacity15)
-                          : AppSemanticColors.dark.propertyVerifiedBadge
-                                .withValues(alpha: AppOpacity.opacity15),
+                      color: colors.propertyVerifiedBadge.withValues(alpha: AppOpacity.opacity15),
                       borderRadius: BorderRadius.circular(AppRadius.radius4),
                     ),
                     child: Text(
@@ -148,9 +146,7 @@ class PropertyCard extends StatelessWidget {
                             fontWeight: AppTypography.weightSemiBold,
                             lineHeight: AppTypography.lineHeight4,
                           ).copyWith(
-                            color: isLightMode
-                                ? AppSemanticColors.light.propertyVerifiedBadge
-                                : AppSemanticColors.dark.propertyVerifiedBadge,
+                            color: colors.propertyVerifiedBadge,
                           ),
                     ),
                   ),

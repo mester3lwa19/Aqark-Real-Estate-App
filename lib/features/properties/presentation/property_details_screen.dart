@@ -5,6 +5,7 @@ import '../../favorites.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/property_image.dart';
 import '../../../routes/app_routes.dart';
 
 class PropertyDetailsScreen extends StatefulWidget {
@@ -258,33 +259,12 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> {
   }
 
   Widget _buildPropertyImage(String imageUrl) {
-    if (imageUrl.startsWith('assets/')) {
-      return Image.asset(
-        imageUrl,
-        height: 300,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Image.network(
-          'https://via.placeholder.com/600x400',
-          height: 300,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      );
-    } else {
-      return Image.network(
-        imageUrl.isNotEmpty ? imageUrl : 'https://via.placeholder.com/600x400',
-        height: 300,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Image.network(
-          'https://via.placeholder.com/600x400',
-          height: 300,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
+    return PropertyImage(
+      imageUrl: imageUrl.isNotEmpty ? imageUrl : 'https://via.placeholder.com/600x400',
+      height: 300,
+      width: double.infinity,
+      fit: BoxFit.cover,
+    );
   }
 
   Widget _buildActionBottomBar(AppSemanticColors colors) {

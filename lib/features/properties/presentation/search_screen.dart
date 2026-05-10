@@ -7,6 +7,7 @@ import '../data/data.dart';
 import 'property_card.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -119,8 +120,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final colors = isDark ? AppSemanticColors.dark : AppSemanticColors.light;
+    final colors = AppTheme.getColors(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,

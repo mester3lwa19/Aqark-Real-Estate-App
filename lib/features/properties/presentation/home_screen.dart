@@ -4,6 +4,7 @@ import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../routes/app_routes.dart';
 import '../models/models.dart';
+import '../../../core/widgets/property_image.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -579,7 +580,7 @@ class PropertyCardPreview extends StatelessWidget {
                   child: SizedBox(
                     height: 180,
                     width: double.infinity,
-                    child: Image.asset(property.imageUrl, fit: BoxFit.cover),
+                    child: PropertyImage(imageUrl: property.imageUrl, fit: BoxFit.cover),
                   ),
                 ),
                 Positioned(
